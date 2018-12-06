@@ -7,7 +7,7 @@ import Testimonials from "../testimonials/Testimonials";
 import {ThreeBounce} from 'better-react-spinkit';
 import AppConfig from "appConfig";
 import {QueryStore} from "shared/components/query/QueryStore";
-import { Timeline } from 'react-twitter-widgets';
+import { Timeline as TwitterWidget } from 'react-twitter-widgets';
 import { Link } from 'react-router';
 import getBrowserWindow from "../../lib/getBrowserWindow";
 import ExtendedRouterStore from "../../lib/ExtendedRouterStore";
@@ -61,14 +61,15 @@ export default class RightBar extends React.Component<IRightBarProps, IRightBarS
     }
 
     private getWhatsNew() {
-        if (!_.isEmpty(AppConfig.serverConfig.skin_right_nav_whats_new_blurb)) {
+         if (!_.isEmpty(AppConfig.serverConfig.skin_right_nav_whats_new_blurb)) {
             return (
                 <div className="rightBarSection">
                     <h3>What's New</h3>
                     <div dangerouslySetInnerHTML={{__html:AppConfig.serverConfig.skin_right_nav_whats_new_blurb!}}></div>
                 </div>
             );
-        } else {
+         } else {
+            let Timeline: typeof TwitterWidget = require('react-twitter-widgets');
             return (
                 <div className="rightBarSection" style={{paddingBottom:20}}>
                     <h3 style={{borderBottom:0}}>
