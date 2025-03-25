@@ -37,6 +37,8 @@ import './styles.css';
 import { selectable } from 'shared/components/query/styles/styles.module.scss';
 import ComparisonScatterPlot from './ComparisonScatterPlot';
 import BoxPlot from './BoxPlot';
+import { Observer } from 'mobx-react';
+import LoadingIndicator from 'shared/components/loadingIndicator/LoadingIndicator';
 
 const jsondata = require('./jsonData/sample.json');
 
@@ -1304,8 +1306,12 @@ class HomePage extends Component<HomePageProps, HomePageState> {
         return (
             <div className="home-page-container">
                 <div
-                    className="chart-configurations"
+                    className="plotsTab leftColumn axisBlock"
                     style={{
+                        background: '#eee',
+                        padding: '10px',
+                        borderRadius: '4px',
+                        minWidth: '300px',
                         maxHeight:
                             chartType === 'bar'
                                 ? '250px'
@@ -1846,12 +1852,12 @@ class HomePage extends Component<HomePageProps, HomePageState> {
                                       }
                                     : chartType == 'pie'
                                     ? {
-                                          width: '100%',
+                                          width: '60%',
                                           border: '1px dashed lightgrey',
                                           borderRadius: '5px',
                                           paddingRight: '5px',
                                           paddingBottom: '10px',
-                                          marginLeft: '6px',
+                                          marginLeft: '10px',
                                       }
                                     : chartType == 'box' ||
                                       chartType == 'comparison'
@@ -1865,12 +1871,21 @@ class HomePage extends Component<HomePageProps, HomePageState> {
                                           height: '900px',
                                           overflow: 'scroll',
                                       }
-                                    : {
+                                    : chartType == 'bar'
+                                    ? {
                                           margin: '12px auto',
                                           border: '1px dashed lightgrey',
                                           borderRadius: '5px',
-                                          padding: '10px',
+                                          padding: '8px',
                                           width: '750px',
+                                          marginLeft: '0px',
+                                      }
+                                    : {
+                                          margin: '0px',
+                                          border: '0px',
+                                          borderRadius: '0px',
+                                          padding: '0px',
+                                          width: '0px',
                                       }
                             }
                         >
@@ -2041,7 +2056,7 @@ class HomePage extends Component<HomePageProps, HomePageState> {
                             width: '25%',
                             marginTop: '85px',
                             marginLeft: '10px',
-                            textAlign: 'center',
+                            textAlign: 'left',
                         }}
                     >
                         <StackToolTip
@@ -2070,6 +2085,19 @@ class HomePage extends Component<HomePageProps, HomePageState> {
                             }
                         />
                     </div>
+                )}
+                {chartType === null && (
+                    <>
+                        <div
+                            className={'alert alert-info'}
+                            style={{
+                                height: '32px',
+                                marginLeft: '10px',
+                            }}
+                        >
+                            Please select profile or type of chart.
+                        </div>
+                    </>
                 )}
             </div>
         );

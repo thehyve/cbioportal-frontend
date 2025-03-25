@@ -233,11 +233,6 @@ const BarChart: React.FC<BarChartProps> = observer(
                             marginBottom: '20px',
                         }}
                     >
-                        <h2>
-                            {heading && heading.length > 0
-                                ? heading.replace(/_/g, ' ')
-                                : 'No Data'}
-                        </h2>
                         <label
                             style={{
                                 display: 'block',

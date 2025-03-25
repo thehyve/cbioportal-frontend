@@ -599,6 +599,7 @@ const StackedBarChart: React.FC<StackedBarChartProps> = ({
                             onMouseLeave={() =>
                                 setDownloadOptionsVisible(false)
                             }
+                            className="btn btn-default btn-xs"
                         >
                             <i
                                 className="fa fa-cloud-download"

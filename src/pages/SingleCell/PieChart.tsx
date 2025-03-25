@@ -146,14 +146,6 @@ const Chart: React.FC<ChartProps> = observer(
         return (
             <>
                 <div id="div-to-download" style={{ position: 'relative' }}>
-                    <div style={{ marginTop: '30px' }}>
-                        <h2 style={{ textAlign: 'center' }}>
-                            {heading && heading.length > 0
-                                ? heading.replace(/_/g, ' ')
-                                : 'No Data'}
-                        </h2>
-                    </div>
-
                     <div
                         style={{
                             display: 'flex',
@@ -200,7 +192,7 @@ const Chart: React.FC<ChartProps> = observer(
                         }}
                         onMouseEnter={() => setDownloadOptionsVisible(true)}
                         onMouseLeave={() => setDownloadOptionsVisible(false)}
-                        className="exclude-from-svg"
+                        className="btn btn-default btn-xs"
                     >
                         <i
                             className="fa fa-cloud-download"
