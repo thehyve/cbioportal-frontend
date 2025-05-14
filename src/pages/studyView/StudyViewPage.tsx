@@ -81,6 +81,7 @@ import {
 import { VirtualStudyModal } from 'pages/studyView/virtualStudy/VirtualStudyModal';
 import PlotsTab from 'shared/components/plots/PlotsTab';
 import HomePage from 'pages/SingleCell/HomePage';
+import SingleCellTab from 'pages/SingleCell/SingleCellTab';
 function SuspenseWrapper<P extends JSX.IntrinsicAttributes>(
     Component: React.ComponentType<P>
 ) {
@@ -92,7 +93,7 @@ function SuspenseWrapper<P extends JSX.IntrinsicAttributes>(
 }
 const LazyHomePage = SuspenseWrapper(
     // @ts-ignore
-    React.lazy(() => import('pages/SingleCell/HomePage'))
+    React.lazy(() => import('pages/SingleCell/SingleCellTab'))
 );
 export interface IStudyViewPageProps {
     routing: any;
@@ -723,14 +724,36 @@ export default class StudyViewPage extends React.Component<
                                                         {
                                                             StudyViewPageTabDescriptions.SINGLECELL
                                                         }{' '}
-                                                        <strong className={'beta-text'}>
+                                                        <strong
+                                                            className={
+                                                                'beta-text'
+                                                            }
+                                                        >
                                                             Beta!
                                                         </strong>
                                                     </span>
                                                 }
                                             >
+                                                // this here is single cell data
                                                 <LazyHomePage
                                                     store={this.store}
+                                                    genericAssayProfiles={
+                                                        this.store
+                                                            .genericAssayProfiles
+                                                            .result
+                                                    }
+                                                    genericAssayData={
+                                                        this.store
+                                                            .genericAssayEntitiesGroupedByProfileId
+                                                            .result
+                                                    }
+                                                    sampleIds={
+                                                        this.store.samples
+                                                            .result
+                                                    }
+                                                    svgWidth={100}
+                                                    svgHeight={100}
+                                                    svgID={'SingleCell'}
                                                 />
                                             </MSKTab>
                                         )}

@@ -17,6 +17,8 @@ import {
     ChartMetaDataTypeEnum,
     convertGenericAssayDataBinsToDataBins,
     DataBin,
+    getHeightByDimension,
+    getWidthByDimension,
 } from 'pages/studyView/StudyViewUtils';
 import internalClient from 'shared/api/cbioportalInternalClientInstance';
 import client from 'shared/api/cbioportalClientInstance';
@@ -45,6 +47,7 @@ import LoadingIndicator from 'shared/components/loadingIndicator/LoadingIndicato
 import { remoteData } from 'cbioportal-frontend-commons';
 import { isGenericAssaySelected } from './SingleCellTabUtils';
 import { Sample } from 'cbioportal-ts-api-client/src';
+import { ChartTypeEnum } from 'pages/studyView/StudyViewConfig';
 export interface ISingleCellTabProps {
     store: StudyViewPageStore;
     genericAssayProfiles: any[];
@@ -64,6 +67,12 @@ const PlotTypes = [
     { value: 'BoxPlotChart', label: 'Box Plot' },
     { value: 'HistogramChart', label: 'Histogram' },
 ];
+
+enum ChartTypeSingleCellEnum {
+    PIE_CHART = 'PieChart',
+    BAR_CHART = 'BoxPlotChart',
+    HISTOGRAM = 'HistogramChart',
+}
 
 interface Option {
     value: string;
@@ -135,29 +144,86 @@ export default class SingleCellTab extends React.Component<
     }
 
     // Get the single cell data via generic assay
-    /*readonly fetchSingleCellData = remoteData({
-        await: () => [this.selectedProfile],
+    readonly fetchSingleCellData = remoteData({
         invoke: async () => {
             if (!this.selectedProfile) {
-                return [];
-            }
-
-            try {
-                const singleCellData = await client.fetchGenericAssayDataInMolecularProfileUsingPOST({
-                    molecularProfileId: this.selectedProfile.value,
-                    genericAssayFilter: {
-                        genericAssayStableIds: ['Astrocyte'],
-                        sampleIds: this.props.sampleIds.map(x => x.sampleId),
-                    } as GenericAssayFilter,
-                });
-
+                return Promise.resolve([]);
+            } else {
+                const singleCellData = await client.fetchGenericAssayDataInMolecularProfileUsingPOST(
+                    {
+                        molecularProfileId: this.selectedProfile.value,
+                        genericAssayFilter: {
+                            genericAssayStableIds: ['Astrocyte'],
+                            sampleIds: this.props.sampleIds.map(
+                                x => x.sampleId
+                            ),
+                        } as GenericAssayFilter,
+                    }
+                );
+                console.log(singleCellData);
                 return singleCellData;
-            } catch (error) {
-                console.error("Failed to fetch data:", error);
-                return [];
             }
         },
-    });*/
+    });
+
+    @computed
+    get chart() {
+        // @ts-ignore
+        switch (this.selectedChart.value) {
+            case ChartTypeSingleCellEnum.PIE_CHART: {
+                return () => (
+                    <PieChart
+                        width={500}
+                        height={560}
+                        ref={undefined}
+                        onUserSelection={() => {}}
+                        openComparisonPage={undefined}
+                        filters={[]}
+                        data={[10, 50, 100]}
+                        placement={'right'}
+                        label={'Type of cell'}
+                        labelDescription={'dummy'}
+                        patientAttribute={true}
+                    />
+                );
+                break;
+            }
+            case ChartTypeSingleCellEnum.BoxPlotChart: {
+                return () => (
+                    <PieChart
+                        height={560}
+                        ref={undefined}
+                        onUserSelection={() => {}}
+                        openComparisonPage={undefined}
+                        filters={[]}
+                        data={[10, 50, 100]}
+                        placement={'right'}
+                        label={'Type of cell'}
+                        labelDescription={'dummy'}
+                        patientAttribute={true}
+                    />
+                );
+            }
+            case ChartTypeSingleCellEnum.HISTOGRAM: {
+                return () => (
+                    <PieChart
+                        width={500}
+                        height={560}
+                        ref={undefined}
+                        onUserSelection={() => {}}
+                        openComparisonPage={undefined}
+                        filters={[]}
+                        data={[10, 50, 100]}
+                        placement={'right'}
+                        label={'Type of cell'}
+                        labelDescription={'dummy'}
+                        patientAttribute={true}
+                    />
+                );
+            }
+        }
+        return [];
+    }
 
     /*@computed getTissuesAndSamplesWithExpressionData(){
         let tmpTissueList:[]=[];
@@ -182,7 +248,6 @@ export default class SingleCellTab extends React.Component<
 
     render() {
         this.setSingleCellData();
-        this.geSeData();
         return (
             <div className="single-cell-data-container">
                 <LoadingIndicator
