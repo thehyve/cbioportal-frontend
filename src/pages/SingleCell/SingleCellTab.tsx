@@ -33,7 +33,8 @@ import {
     GenericAssayData,
 } from 'cbioportal-ts-api-client';
 import PieChart from 'pages/studyView/charts/pieChart/PieChart';
-import BarChart from './BarChart';
+import BarChart from 'pages/studyView/charts/barChart/BarChart';
+import MultipleCategoryBarPlot from 'pages/groupComparison/MultipleCategoryBarPlot';
 import StackedBarChart from './StackedBarChart';
 import StackToolTip from './StackToolTip';
 import PieToolTip from './PieToolTip';
@@ -64,14 +65,14 @@ interface Entity {
 
 const PlotTypes = [
     { value: 'PieChart', label: 'Pie Chart' },
-    { value: 'BoxPlotChart', label: 'Box Plot' },
+    { value: 'StackedBarChart', label: 'Stacked Bar Chart' },
     { value: 'HistogramChart', label: 'Histogram' },
 ];
 
 enum ChartTypeSingleCellEnum {
     PIE_CHART = 'PieChart',
-    BAR_CHART = 'BoxPlotChart',
-    HISTOGRAM = 'HistogramChart',
+    STACKED_BAR_CHART = 'StackedBarChart',
+    BAR_CHART = 'HistogramChart',
 }
 
 interface Option {
@@ -84,6 +85,134 @@ interface Option {
     genericAssayEntityId: string;
     patientLevel: boolean;
 }
+
+const testPieData = [
+    {
+        count: 10,
+        value: 'ten',
+        color: 'blue',
+        percentage: 10,
+        freq: 'test',
+    },
+    {
+        count: 50,
+        value: 'fifty',
+        color: 'blue',
+        percentage: 50,
+        freq: 'test2',
+    },
+    {
+        count: 100,
+        value: 'hundred',
+        color: 'blue',
+        percentage: 100,
+        freq: 'test',
+    },
+];
+
+const testBarChartData: DataBin[] = [
+    {
+        id: 'bin1',
+        count: 10,
+        start: 0,
+        end: 10,
+        specialValue: 'normal',
+    },
+    {
+        id: 'bin2',
+        count: 50,
+        start: 11,
+        end: 20,
+        specialValue: 'normal',
+    },
+    {
+        id: 'bin3',
+        count: 100,
+        start: 21,
+        end: 30,
+        specialValue: 'normal',
+    },
+];
+
+const testhorzData = [
+    {
+        uniqueSampleKey: 'sample_001',
+        value: 'Positive',
+        // thresholdType: '>',
+    },
+    {
+        uniqueSampleKey: 'sample_002',
+        value: ['Negative', 'Borderline'],
+        // thresholdType: '<',
+    },
+    {
+        uniqueSampleKey: 'sample_003',
+        value: 'Unknown',
+        // thresholdType: '<',
+    },
+    {
+        uniqueSampleKey: 'sample_004',
+        value: ['High', 'Low'],
+        // thresholdType: '>',
+    },
+];
+
+const testvertData = [
+    {
+        uniqueSampleKey: 'sample_001',
+        value: 'Positive',
+        // thresholdType: '>',
+    },
+    {
+        uniqueSampleKey: 'sample_002',
+        value: ['Negative', 'Borderline'],
+        // thresholdType: '<',
+    },
+    {
+        uniqueSampleKey: 'sample_003',
+        value: 'Unknown',
+        // thresholdType: '<',
+    },
+    {
+        uniqueSampleKey: 'sample_004',
+        value: ['High', 'Low'],
+        // thresholdType: '>',
+    },
+];
+
+const testBarPlotData = [
+    {
+        minorCategory: 'Group A',
+        counts: [
+            { majorCategory: 'Type 1', count: 30, percentage: 37.5 },
+            { majorCategory: 'Type 2', count: 20, percentage: 25.0 },
+            { majorCategory: 'Type 3', count: 30, percentage: 37.5 },
+        ],
+    },
+    {
+        minorCategory: 'Group B',
+        counts: [
+            { majorCategory: 'Type 1', count: 10, percentage: 20.0 },
+            { majorCategory: 'Type 2', count: 25, percentage: 50.0 },
+            { majorCategory: 'Type 3', count: 15, percentage: 30.0 },
+        ],
+    },
+    {
+        minorCategory: 'Group C',
+        counts: [
+            { majorCategory: 'Type 1', count: 5, percentage: 10.0 },
+            { majorCategory: 'Type 2', count: 10, percentage: 20.0 },
+            { majorCategory: 'Type 3', count: 35, percentage: 70.0 },
+        ],
+    },
+];
+
+const categoryToColor: { [cat: string]: string } = {
+    'Group A': '#1f77b4',
+    'Group B': '#ff7f0e',
+    'Group C': '#2ca02c',
+};
+
 const jsondata = require('./jsonData/sample.json');
 @observer
 export default class SingleCellTab extends React.Component<
@@ -187,29 +316,7 @@ export default class SingleCellTab extends React.Component<
                             onUserSelection={() => {}}
                             openComparisonPage={undefined}
                             filters={[]}
-                            data={[
-                                {
-                                    count: 10,
-                                    value: 'ten',
-                                    color: 'blue',
-                                    percentage: 10,
-                                    freq: 'test',
-                                },
-                                {
-                                    count: 50,
-                                    value: 'fifty',
-                                    color: 'blue',
-                                    percentage: 50,
-                                    freq: 'test2',
-                                },
-                                {
-                                    count: 100,
-                                    value: 'hundred',
-                                    color: 'blue',
-                                    percentage: 100,
-                                    freq: 'test',
-                                },
-                            ]}
+                            data={testPieData}
                             placement={'right'}
                             label={'Type of cell'}
                             labelDescription={'dummy'}
@@ -221,81 +328,54 @@ export default class SingleCellTab extends React.Component<
             case ChartTypeSingleCellEnum.BAR_CHART: {
                 return (
                     <div className="borderedChart posRelative">
-                        <PieChart
+                        <BarChart
+                            data={testBarChartData}
                             width={500}
                             height={560}
-                            ref={undefined}
-                            onUserSelection={() => {}}
-                            openComparisonPage={undefined}
                             filters={[]}
-                            data={[
-                                {
-                                    count: 10,
-                                    value: 'ten',
-                                    color: 'blue',
-                                    percentage: 10,
-                                    freq: 'test',
-                                },
-                                {
-                                    count: 50,
-                                    value: 'fifty',
-                                    color: 'blue',
-                                    percentage: 50,
-                                    freq: 'test2',
-                                },
-                                {
-                                    count: 100,
-                                    value: 'hundred',
-                                    color: 'blue',
-                                    percentage: 100,
-                                    freq: 'test',
-                                },
-                            ]}
-                            placement={'right'}
-                            label={'Type of cell'}
-                            labelDescription={'dummy'}
-                            patientAttribute={true}
+                            onUserSelection={() => {}}
+                            showNAChecked={false}
+                            xAxisLabel={'Bins'}
+                            yAxisLabel={'Count'}
                         />
                     </div>
                 );
             }
-            case ChartTypeSingleCellEnum.HISTOGRAM: {
+            case ChartTypeSingleCellEnum.STACKED_BAR_CHART: {
                 return (
                     <div className="borderedChart posRelative">
-                        <PieChart
-                            width={500}
-                            height={560}
-                            ref={undefined}
-                            onUserSelection={() => {}}
-                            openComparisonPage={undefined}
-                            filters={[]}
-                            data={[
-                                {
-                                    count: 10,
-                                    value: 'ten',
-                                    color: 'blue',
-                                    percentage: 10,
-                                    freq: 'test',
-                                },
-                                {
-                                    count: 50,
-                                    value: 'fifty',
-                                    color: 'blue',
-                                    percentage: 50,
-                                    freq: 'test2',
-                                },
-                                {
-                                    count: 100,
-                                    value: 'hundred',
-                                    color: 'blue',
-                                    percentage: 100,
-                                    freq: 'test',
-                                },
+                        <MultipleCategoryBarPlot
+                            svgId={'testsvgId'}
+                            domainPadding={10}
+                            horzData={testhorzData}
+                            vertData={testvertData}
+                            plotData={testBarPlotData}
+                            categoryToColor={categoryToColor}
+                            barWidth={20}
+                            chartBase={30}
+                            horizontalBars={true}
+                            horzCategoryOrder={[
+                                'Group A',
+                                'Group B',
+                                'Group C',
                             ]}
-                            placement={'right'}
-                            label={'Type of cell'}
-                            labelDescription={'dummy'}
-                            patientAttribute={true}
+                            vertCategoryOrder={['Type 1', 'Type 2', 'Type 3']}
+                            axisLabelX={'Sample Count'}
+                            axisLabelY={'Cell Type'}
+                            legendLocationWidthThreshold={100}
+                            percentage={true}
+                            stacked={true}
+                            ticksCount={5}
+                            axisStyle={{
+                                fontSize: '12px',
+                                fontFamily: 'Arial',
+                                fill: '#333',
+                            }}
+                            countAxisLabel={'Sample Count'}
+                            tooltip={undefined}
+                            svgRef={undefined}
+                            pValue={0.1}
+                            qValue={0.05}
                         />
                     </div>
                 );
