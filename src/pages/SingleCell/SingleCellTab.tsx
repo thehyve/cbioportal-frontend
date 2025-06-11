@@ -169,123 +169,131 @@ export default class SingleCellTab extends React.Component<
     @computed
     get chart() {
         // @ts-ignore
+        if (!this.selectedChart) {
+            return <div>Please select a plot.</div>;
+        }
         switch (this.selectedChart.value) {
             case ChartTypeSingleCellEnum.PIE_CHART: {
-                return () => (
-                    <PieChart
-                        width={500}
-                        height={560}
-                        ref={undefined}
-                        onUserSelection={() => {}}
-                        openComparisonPage={undefined}
-                        filters={[]}
-                        data={[
-                            {
-                                count: 10,
-                                value: 'ten',
-                                color: 'blue',
-                                percentage: 10,
-                                freq: 'test',
-                            },
-                            {
-                                count: 50,
-                                value: 'fifty',
-                                color: 'blue',
-                                percentage: 50,
-                                freq: 'test2',
-                            },
-                            {
-                                count: 100,
-                                value: 'hundred',
-                                color: 'blue',
-                                percentage: 100,
-                                freq: 'test',
-                            },
-                        ]}
-                        placement={'right'}
-                        label={'Type of cell'}
-                        labelDescription={'dummy'}
-                        patientAttribute={true}
-                    />
+                return (
+                    <div>
+                        <PieChart
+                            width={500}
+                            height={560}
+                            ref={undefined}
+                            onUserSelection={() => {}}
+                            openComparisonPage={undefined}
+                            filters={[]}
+                            data={[
+                                {
+                                    count: 10,
+                                    value: 'ten',
+                                    color: 'blue',
+                                    percentage: 10,
+                                    freq: 'test',
+                                },
+                                {
+                                    count: 50,
+                                    value: 'fifty',
+                                    color: 'blue',
+                                    percentage: 50,
+                                    freq: 'test2',
+                                },
+                                {
+                                    count: 100,
+                                    value: 'hundred',
+                                    color: 'blue',
+                                    percentage: 100,
+                                    freq: 'test',
+                                },
+                            ]}
+                            placement={'right'}
+                            label={'Type of cell'}
+                            labelDescription={'dummy'}
+                            patientAttribute={true}
+                        />
+                    </div>
                 );
-                break;
             }
             case ChartTypeSingleCellEnum.BAR_CHART: {
-                return () => (
-                    <PieChart
-                        width={500}
-                        height={560}
-                        ref={undefined}
-                        onUserSelection={() => {}}
-                        openComparisonPage={undefined}
-                        filters={[]}
-                        data={[
-                            {
-                                count: 10,
-                                value: 'ten',
-                                color: 'blue',
-                                percentage: 10,
-                                freq: 'test',
-                            },
-                            {
-                                count: 50,
-                                value: 'fifty',
-                                color: 'blue',
-                                percentage: 50,
-                                freq: 'test2',
-                            },
-                            {
-                                count: 100,
-                                value: 'hundred',
-                                color: 'blue',
-                                percentage: 100,
-                                freq: 'test',
-                            },
-                        ]}
-                        placement={'right'}
-                        label={'Type of cell'}
-                        labelDescription={'dummy'}
-                        patientAttribute={true}
-                    />
+                return (
+                    <div>
+                        <PieChart
+                            width={500}
+                            height={560}
+                            ref={undefined}
+                            onUserSelection={() => {}}
+                            openComparisonPage={undefined}
+                            filters={[]}
+                            data={[
+                                {
+                                    count: 10,
+                                    value: 'ten',
+                                    color: 'blue',
+                                    percentage: 10,
+                                    freq: 'test',
+                                },
+                                {
+                                    count: 50,
+                                    value: 'fifty',
+                                    color: 'blue',
+                                    percentage: 50,
+                                    freq: 'test2',
+                                },
+                                {
+                                    count: 100,
+                                    value: 'hundred',
+                                    color: 'blue',
+                                    percentage: 100,
+                                    freq: 'test',
+                                },
+                            ]}
+                            placement={'right'}
+                            label={'Type of cell'}
+                            labelDescription={'dummy'}
+                            patientAttribute={true}
+                        />
+                    </div>
                 );
             }
             case ChartTypeSingleCellEnum.HISTOGRAM: {
-                return () => (
-                    <PieChart
-                        width={500}
-                        height={560}
-                        ref={undefined}
-                        onUserSelection={() => {}}
-                        openComparisonPage={undefined}
-                        filters={[]}
-                        data={[
-                            {
-                                count: 10,
-                                value: 'ten',
-                                color: 'blue',
-                                percentage: 10,
-                                freq: 'test',
-                            },
-                            {
-                                count: 50,
-                                value: 'fifty',
-                                color: 'blue',
-                                percentage: 50,
-                                freq: 'test2',
-                            },
-                            {
-                                count: 100,
-                                value: 'hundred',
-                                color: 'blue',
-                                percentage: 100,
-                                freq: 'test',
-                            },
-                        ]}
-                        placement={'right'}
-                        label={'Type of cell'}
-                        labelDescription={'dummy'}
-                        patientAttribute={true}
-                    />
+                return (
+                    <div>
+                        <PieChart
+                            width={500}
+                            height={560}
+                            ref={undefined}
+                            onUserSelection={() => {}}
+                            openComparisonPage={undefined}
+                            filters={[]}
+                            data={[
+                                {
+                                    count: 10,
+                                    value: 'ten',
+                                    color: 'blue',
+                                    percentage: 10,
+                                    freq: 'test',
+                                },
+                                {
+                                    count: 50,
+                                    value: 'fifty',
+                                    color: 'blue',
+                                    percentage: 50,
+                                    freq: 'test2',
+                                },
+                                {
+                                    count: 100,
+                                    value: 'hundred',
+                                    color: 'blue',
+                                    percentage: 100,
+                                    freq: 'test',
+                                },
+                            ]}
+                            placement={'right'}
+                            label={'Type of cell'}
+                            labelDescription={'dummy'}
+                            patientAttribute={true}
+                        />
+                    </div>
                 );
             }
         }
@@ -360,6 +368,9 @@ export default class SingleCellTab extends React.Component<
                             </div>
                         )}
                     </div>
+                </div>
+                <div className={'chartArea'}>
+                    <div className="chartWrapper">{this.chart}</div>
                 </div>
             </div>
         );
