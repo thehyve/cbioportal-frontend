@@ -32,7 +32,7 @@ import {
     MolecularProfile,
     GenericAssayData,
 } from 'cbioportal-ts-api-client';
-import PieChart from './PieChart';
+import PieChart from 'pages/studyView/charts/pieChart/PieChart';
 import BarChart from './BarChart';
 import StackedBarChart from './StackedBarChart';
 import StackToolTip from './StackToolTip';
@@ -51,7 +51,7 @@ import { ChartTypeEnum } from 'pages/studyView/StudyViewConfig';
 export interface ISingleCellTabProps {
     store: StudyViewPageStore;
     genericAssayProfiles: any[];
-    genericAssayData: any[] | undefined;
+    genericAssayData: { [profileID: string]: GenericAssayMeta[] } | undefined;
     sampleIds: Sample[];
     svgWidth: number;
     svgHeight: number;
@@ -179,7 +179,29 @@ export default class SingleCellTab extends React.Component<
                         onUserSelection={() => {}}
                         openComparisonPage={undefined}
                         filters={[]}
-                        data={[10, 50, 100]}
+                        data={[
+                            {
+                                count: 10,
+                                value: 'ten',
+                                color: 'blue',
+                                percentage: 10,
+                                freq: 'test',
+                            },
+                            {
+                                count: 50,
+                                value: 'fifty',
+                                color: 'blue',
+                                percentage: 50,
+                                freq: 'test2',
+                            },
+                            {
+                                count: 100,
+                                value: 'hundred',
+                                color: 'blue',
+                                percentage: 100,
+                                freq: 'test',
+                            },
+                        ]}
                         placement={'right'}
                         label={'Type of cell'}
                         labelDescription={'dummy'}
@@ -188,15 +210,38 @@ export default class SingleCellTab extends React.Component<
                 );
                 break;
             }
-            case ChartTypeSingleCellEnum.BoxPlotChart: {
+            case ChartTypeSingleCellEnum.BAR_CHART: {
                 return () => (
                     <PieChart
+                        width={500}
                         height={560}
                         ref={undefined}
                         onUserSelection={() => {}}
                         openComparisonPage={undefined}
                         filters={[]}
-                        data={[10, 50, 100]}
+                        data={[
+                            {
+                                count: 10,
+                                value: 'ten',
+                                color: 'blue',
+                                percentage: 10,
+                                freq: 'test',
+                            },
+                            {
+                                count: 50,
+                                value: 'fifty',
+                                color: 'blue',
+                                percentage: 50,
+                                freq: 'test2',
+                            },
+                            {
+                                count: 100,
+                                value: 'hundred',
+                                color: 'blue',
+                                percentage: 100,
+                                freq: 'test',
+                            },
+                        ]}
                         placement={'right'}
                         label={'Type of cell'}
                         labelDescription={'dummy'}
@@ -213,7 +258,29 @@ export default class SingleCellTab extends React.Component<
                         onUserSelection={() => {}}
                         openComparisonPage={undefined}
                         filters={[]}
-                        data={[10, 50, 100]}
+                        data={[
+                            {
+                                count: 10,
+                                value: 'ten',
+                                color: 'blue',
+                                percentage: 10,
+                                freq: 'test',
+                            },
+                            {
+                                count: 50,
+                                value: 'fifty',
+                                color: 'blue',
+                                percentage: 50,
+                                freq: 'test2',
+                            },
+                            {
+                                count: 100,
+                                value: 'hundred',
+                                color: 'blue',
+                                percentage: 100,
+                                freq: 'test',
+                            },
+                        ]}
                         placement={'right'}
                         label={'Type of cell'}
                         labelDescription={'dummy'}
