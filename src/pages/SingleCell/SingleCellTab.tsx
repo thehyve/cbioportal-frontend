@@ -170,12 +170,16 @@ export default class SingleCellTab extends React.Component<
     get chart() {
         // @ts-ignore
         if (!this.selectedChart) {
-            return <div>Please select a plot.</div>;
+            return (
+                <div className="alert alert-info" style={{ height: '32px' }}>
+                    Please select a plot.
+                </div>
+            );
         }
         switch (this.selectedChart.value) {
             case ChartTypeSingleCellEnum.PIE_CHART: {
                 return (
-                    <div>
+                    <div className="borderedChart posRelative">
                         <PieChart
                             width={500}
                             height={560}
@@ -216,7 +220,7 @@ export default class SingleCellTab extends React.Component<
             }
             case ChartTypeSingleCellEnum.BAR_CHART: {
                 return (
-                    <div>
+                    <div className="borderedChart posRelative">
                         <PieChart
                             width={500}
                             height={560}
@@ -257,7 +261,7 @@ export default class SingleCellTab extends React.Component<
             }
             case ChartTypeSingleCellEnum.HISTOGRAM: {
                 return (
-                    <div>
+                    <div className="borderedChart posRelative">
                         <PieChart
                             width={500}
                             height={560}
@@ -324,53 +328,73 @@ export default class SingleCellTab extends React.Component<
     render() {
         this.setSingleCellData();
         return (
-            <div className="single-cell-data-container">
+            <div
+                className="single-cell-data-container"
+                style={{ display: 'flex' }}
+            >
                 <LoadingIndicator
                     isLoading={this.jsonDataLoading}
                     center={true}
                     size={'big'}
                 />
-                <div className="chart-configurations">
-                    <div>
-                        <label className="label-text">Data Type</label>
-                        <div style={{ width: 300 }}>
-                            <Select
-                                className="basic-single"
-                                name={'singleCellDataSelector'}
-                                classNamePrefix={'selectSingleCellData'}
-                                value={this.selectedProfile}
-                                onChange={(option: any) =>
-                                    this.onProfileChange(option)
-                                }
-                                options={this.availableSingleCellTypes}
-                                searchable={false}
-                                clearable={false}
-                            />
-                        </div>
-
-                        {this.dataTypeSelected && (
-                            <div>
-                                <label className="label-text">Plot Type</label>
-                                <div style={{ width: 300 }}>
-                                    <Select
-                                        className="basic-single"
-                                        name={'selectPlotType'}
-                                        classNamePrefix={'selectPlotType'}
-                                        value={this.selectedChart}
-                                        onChange={(option: any) =>
-                                            this.onPlotTypeChange(option)
-                                        }
-                                        options={PlotTypes}
-                                        searchable={false}
-                                        clearable={false}
-                                    />
-                                </div>
+                <div>
+                    <div
+                        className="plotsTab leftColumn axisBlock"
+                        style={{
+                            background: '#eee',
+                            padding: '10px',
+                            borderRadius: '4px',
+                            minWidth: '300px',
+                        }}
+                    >
+                        <div>
+                            <label className="label-text">Data Type</label>
+                            <div style={{ width: 300 }}>
+                                <Select
+                                    className="basic-single"
+                                    name={'singleCellDataSelector'}
+                                    classNamePrefix={'selectSingleCellData'}
+                                    value={this.selectedProfile}
+                                    onChange={(option: any) =>
+                                        this.onProfileChange(option)
+                                    }
+                                    options={this.availableSingleCellTypes}
+                                    searchable={false}
+                                    clearable={false}
+                                />
                             </div>
-                        )}
+
+                            {this.dataTypeSelected && (
+                                <div>
+                                    <label className="label-text">
+                                        Plot Type
+                                    </label>
+                                    <div style={{ width: 300 }}>
+                                        <Select
+                                            className="basic-single"
+                                            name={'selectPlotType'}
+                                            classNamePrefix={'selectPlotType'}
+                                            value={this.selectedChart}
+                                            onChange={(option: any) =>
+                                                this.onPlotTypeChange(option)
+                                            }
+                                            options={PlotTypes}
+                                            searchable={false}
+                                            clearable={false}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
                 <div className={'chartArea'}>
-                    <div className="chartWrapper">{this.chart}</div>
+                    <div
+                        className="chartWrapper"
+                        style={{ marginLeft: '10px' }}
+                    >
+                        {this.chart}
+                    </div>
                 </div>
             </div>
         );
