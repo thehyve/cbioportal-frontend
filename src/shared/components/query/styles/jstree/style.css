@@ -356,7 +356,7 @@ li.jstree-node.jstree-leaf > a.jstree-clicked {
 }
 .jstree-default .jstree-search {
     font-style: italic !important;
-    color: #3786c2 !important;
+    color: #F95710 !important;
     font-weight: bold;
 }
 .jstree-default .jstree-no-checkboxes .jstree-checkbox {

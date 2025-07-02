@@ -66,7 +66,7 @@ describe('StructureVisualizer3D', () => {
             backgroundColor: '#FFFFFF',
             baseColor: '#DDDDDD',
             structureColors: {
-                alphaHelix: '#FFA500',
+                alphaHelix: '#F95710',
                 betaSheet: '#0000FF',
                 loop: '#EEEEEE',
             },
@@ -324,8 +324,8 @@ describe('StructureVisualizer3D', () => {
 
         assert.equal(
             structureToColor['h'],
-            '0xFFA500',
-            'Alpha helices should be colored with 0xFFA500 when SECONDARY_STRUCTURE is selected'
+            '0xF95710',
+            'Alpha helices should be colored with 0xF95710 when SECONDARY_STRUCTURE is selected'
         );
         assert.equal(
             structureToColor['s'],

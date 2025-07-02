@@ -26,7 +26,7 @@ export class ColorPickerIcon extends React.Component<
                     width="12"
                     height="12"
                     fill={color == undefined ? '#FFFFFF' : color}
-                    stroke="#3786c2"
+                    stroke="#F95710"
                     stroke-width="4"
                     cursor="pointer"
                 />

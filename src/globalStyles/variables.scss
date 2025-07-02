@@ -22,6 +22,13 @@ $darkGrey: #999;
 $redError: #a71111;
 $greenSuccess: #11a747;
 
+/* Hyve Colors */
+$lightGreen: #8bd034;
+$mediumGreen: #4eb45a;
+$darkGreen: #0d7d60;
+$darkBlue: #2d1c5d;
+$orange: #f95710;
+
 .portalWidth {
     padding-left: 20px;
     padding-right: 20px;
@@ -30,11 +37,11 @@ $greenSuccess: #11a747;
 
 $gutterWidth: 20px;
 
-$brand-primary: #3786c2;
+$brand-primary: $orange;
 
 $borderColor: $mediumGrey;
 
-$headerColor: #3786c2;
+$headerColor: $darkGreen;
 
 $cornerBorderRadius: 5px;
 

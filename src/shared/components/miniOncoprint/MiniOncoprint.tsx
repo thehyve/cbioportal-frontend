@@ -54,13 +54,13 @@ export const MiniOncoprint: React.SFC<IMiniOncoprint> = props => {
                 <div
                     style={{
                         width: `${props.group1Altered}%`,
-                        background: '#3786C2',
+                        background: '#F95710',
                     }}
                 ></div>
                 <div
                     style={{
                         width: `${props.group2Altered}%`,
-                        background: '#3786C2',
+                        background: '#F95710',
                     }}
                 ></div>
                 <div

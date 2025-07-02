@@ -472,7 +472,7 @@ h3 {
 }
 
 #rightColumn {
-    background: $lightBlue;
+    background: rgba(78, 180, 90, 0.2);
     padding: $gutterWidth 0;
     font-size: 12px;
     flex: 0 0 325px;
@@ -481,10 +481,10 @@ h3 {
 
     .rightBarSection {
         h3 {
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid darkolivegreen;
             margin: 0 0 4px 0;
             padding-bottom: 4px;
-            color: $brand-primary;
+            color: rgb(13, 125, 96);
         }
         padding: 0 $gutterWidth 10px $gutterWidth;
     }
@@ -669,7 +669,7 @@ h3.hr {
 }
 
 .beta-text {
-    color: #ffa500;
+    color: #F95710;
     text-decoration: none;
 }
 

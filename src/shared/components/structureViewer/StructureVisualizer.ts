@@ -84,7 +84,7 @@ abstract class StructureVisualizer {
         backgroundColor: '#FFFFFF',
         baseColor: '#DDDDDD',
         structureColors: {
-            alphaHelix: '#FFA500',
+            alphaHelix: '#F95710',
             betaSheet: '#0000FF',
             loop: '#DDDDDD',
         },

@@ -204,7 +204,7 @@ div.SelectedStudiesWindow {
     }
 
     ul.cancerTypeList {
-        background: $lightBlue;
+        background: rgba(13, 125, 96, 0.3);
         padding: 0px;
         margin: 0px !important;
         width: 230px;
@@ -216,7 +216,7 @@ div.SelectedStudiesWindow {
             flex-direction: row;
             align-items: center;
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            color: #043852;
+            color: black;
             border-bottom: 1px solid rgb(222, 233, 241);
             border-top: 1px solid rgb(243, 248, 251);
             padding: 8px 10px;
@@ -228,7 +228,7 @@ div.SelectedStudiesWindow {
                 }
 
                 &.cancerTypeListItemCount {
-                    background-color: rgb(222, 233, 241);
+                    background-color: rgba(78, 180, 90, 0.4);
                     border-radius: 2px;
                     box-shadow: 0px 1px 0px rgba(0, 0, 0, 0.1);
                     font: normal normal 400 10px/19px 'Helvetica Neue',
@@ -242,11 +242,11 @@ div.SelectedStudiesWindow {
 
     .selectable:hover {
         color: #000;
-        background-color: #deeaf3;
+        background-color: rgba(78, 180, 90, 0.7);
     }
 
     .selectable.selected {
-        background-color: rgba(143, 189, 212, 0.42);
+        background-color: rgba(78, 180, 90, 0.4);
     }
 
     .matchingNodeText {
@@ -258,13 +258,13 @@ div.SelectedStudiesWindow {
     }
 
     .containsSelectedStudies {
-        color: #000;
+        color: white;
 
         .cancerTypeListItemCount {
             position: relative;
 
             &:before {
-                background: rgba(25, 130, 184, 0.5);
+                background: rgba(78, 180, 90, 0.5);
                 display: block;
                 position: absolute;
                 top: 0px;

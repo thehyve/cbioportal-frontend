@@ -39,7 +39,7 @@ export function getVolcanoPlotData(
                 const yValue = -(Math.log(representativePvalue) / Math.log(10));
                 const fillColor = map_genesets_selected_volcano.get(name)
                     ? 'tomato'
-                    : '3786C2';
+                    : 'F95710';
                 return { x: xValue, y: yValue, fill: fillColor };
             }
         );
