@@ -11,6 +11,7 @@ import { getOncoQueryDocUrl } from '../../api/urls';
 import { QueryStoreComponent, Focus, GeneReplacement } from './QueryStore';
 import MutSigGeneSelector from './MutSigGeneSelector';
 import GisticGeneSelector from './GisticGeneSelector';
+import ChatBotSelector from './ChatBotSelector';
 import SectionHeader from '../sectionHeader/SectionHeader';
 import { getServerConfig } from 'config/config';
 import { ServerConfigHelpers } from '../../../config/config';
@@ -20,6 +21,7 @@ import { Gene } from 'cbioportal-ts-api-client';
 import GenesetsValidator from './GenesetsValidator';
 import FontAwesome from 'react-fontawesome';
 import GeneSymbolValidationError from './GeneSymbolValidationError';
+import { ChatBotSelectorDropdown } from 'shared/components/query/ChatBotSelectorDropdown';
 
 @observer
 export default class GeneSetSelector extends QueryStoreComponent<{}, {}> {
@@ -148,6 +150,11 @@ export default class GeneSetSelector extends QueryStoreComponent<{}, {}> {
                     </OQLTextArea>
 
                     <GenesetsValidator />
+
+                    <ChatBotSelectorDropdown
+                        collapsibleArea={<ChatBotSelector />}
+                        dropdownTitle={'Ask AI OQL Helper'}
+                    ></ChatBotSelectorDropdown>
 
                     <Modal
                         className={classNames(

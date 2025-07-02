@@ -312,22 +312,31 @@ export default class OQLTextArea extends React.Component<
 
                     {this.props.submitButton}
                 </div>
-                <div className={'oqlValidationContainer'}>
-                    <GeneSymbolValidator
-                        focus={this.props.focus}
-                        geneQuery={this.queryToBeValidated}
-                        skipGeneValidation={this.skipGenesValidation}
-                        updateGeneQuery={this.updateGeneQuery}
-                        afterValidation={this.afterGeneSymbolValidation}
-                        replaceGene={this.replaceGene}
-                        errorMessageOnly={
-                            this.props.location === GeneBoxType.STUDY_VIEW_PAGE
-                        }
-                        highlightError={this.highlightError}
-                    >
-                        {this.props.children}
-                    </GeneSymbolValidator>
-                </div>
+                {this.props.validateInputGeneQuery && (
+                    <div className={'oqlValidationContainer'}>
+                        <GeneSymbolValidator
+                            focus={this.props.focus}
+                            geneQuery={this.queryToBeValidated}
+                            skipGeneValidation={this.skipGenesValidation}
+                            updateGeneQuery={this.updateGeneQuery}
+                            afterValidation={this.afterGeneSymbolValidation}
+                            replaceGene={this.replaceGene}
+                            errorMessageOnly={
+                                this.props.location ===
+                                GeneBoxType.STUDY_VIEW_PAGE
+                            }
+                            highlightError={this.highlightError}
+                        >
+                            {this.props.children}
+                        </GeneSymbolValidator>
+                    </div>
+                )}
+                {!this.props.validateInputGeneQuery &&
+                    this.afterGeneSymbolValidation(
+                        true,
+                        { found: [], suggestions: [] },
+                        getOQL(this.geneQueryStr)
+                    )}
                 <div>
                     {this.showErrorsAndMessages && this.props.error && (
                         <span

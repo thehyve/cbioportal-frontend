@@ -77,6 +77,7 @@ import { QueryParser } from 'shared/lib/query/QueryParser';
 import { AppStore } from 'AppStore';
 import { ResultsViewTab } from 'pages/resultsView/ResultsViewPageHelpers';
 import { CaseSetId } from 'shared/components/query/CaseSetSelectorUtils';
+import { OQLHelperMessage } from 'cbioportal-ts-api-client/dist/generated/CBioPortalAPIInternal';
 
 // interface for communicating
 export type CancerStudyQueryUrlParams = {
@@ -360,6 +361,16 @@ export class QueryStore {
         }
     }
 
+    public getAIResponse() {
+        let message = this.aiQuery;
+        let oqlHelperMessage = {
+            message,
+        } as OQLHelperMessage;
+        return internalClient.getOQLQueryUsingPOST({
+            oqlHelperMessage,
+        });
+    }
+
     //this is to cache a selected ids in the query
     // used in when visualizing a shared another user virtual study
     private _defaultSelectedIds: ObservableMap<
@@ -584,6 +595,24 @@ export class QueryStore {
         // clear error when gene query is modified
         this.genesetQueryErrorDisplayStatus = Focus.Unfocused;
         this.rawGenesetQuery = value;
+    }
+
+    @observable _aiQuery = '';
+    get aiQuery() {
+        return this._aiQuery;
+    }
+
+    set aiQuery(value: string) {
+        this._aiQuery = value;
+    }
+
+    @observable _aiMessage = '';
+    get aiMessage() {
+        return this._aiMessage;
+    }
+
+    set aiMessage(value: string) {
+        this._aiMessage = value;
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -1981,6 +2010,10 @@ export class QueryStore {
             !!this.oql.error ||
             !!this.genesetIdsQuery.error
         ); // to make "Please click 'Submit' to see location of error." possible
+    }
+
+    @computed get generateQueryEnabled() {
+        return this.aiQuery === '';
     }
 
     @computed get summaryEnabled() {
