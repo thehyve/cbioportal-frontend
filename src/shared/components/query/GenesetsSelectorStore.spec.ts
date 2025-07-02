@@ -97,7 +97,7 @@ describe('GenesetsSelectorStore', () => {
                         Math.log(genesets[1].representativePvalue) /
                         Math.log(10)
                     ),
-                    fill: '3786C2',
+                    fill: 'F95710',
                 },
             ]);
         });

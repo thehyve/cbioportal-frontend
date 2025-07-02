@@ -724,10 +724,10 @@
   font-size: inherit;
   line-height: inherit; }
 .cbioportal-frontend a {
-  color: #3786C2;
+  color: rgba(78, 180, 90);
   text-decoration: none; }
 .cbioportal-frontend a:hover, .cbioportal-frontend a:focus {
-  color: #265d86;
+  color: rgb(13, 125, 96);
   text-decoration: underline; }
 .cbioportal-frontend a:focus {
   outline: 5px auto -webkit-focus-ring-color;
@@ -844,7 +844,7 @@
 .cbioportal-frontend .text-muted {
   color: #777777; }
 .cbioportal-frontend .text-primary {
-  color: #3786C2; }
+  color: #F95710; }
 .cbioportal-frontend a.text-primary:hover, .cbioportal-frontend a.text-primary:focus {
   color: #2c6b9a; }
 .cbioportal-frontend .text-success {
@@ -866,7 +866,7 @@
 .cbioportal-frontend .bg-primary {
   color: #fff; }
 .cbioportal-frontend .bg-primary {
-  background-color: #3786C2; }
+  background-color: #F95710; }
 .cbioportal-frontend a.bg-primary:hover, .cbioportal-frontend a.bg-primary:focus {
   background-color: #2c6b9a; }
 .cbioportal-frontend .bg-success {
@@ -1961,30 +1961,30 @@
   background-color: #333; }
 .cbioportal-frontend .btn-primary {
   color: #fff;
-  background-color: #3786C2;
-  border-color: #3178ae; }
+  background-color: rgba(13, 125, 96, 0.7);
+  border-color: rgb(13, 125, 96); }
 .cbioportal-frontend .btn-primary:focus, .cbioportal-frontend .btn-primary.focus {
   color: #fff;
-  background-color: #2c6b9a;
-  border-color: #15344b; }
+  background-color: rgb(78, 180, 90);
+  border-color: rgba(13, 125, 96, 0.5); }
 .cbioportal-frontend .btn-primary:hover {
   color: #fff;
-  background-color: #2c6b9a;
-  border-color: #24577e; }
+  background-color: rgb(78, 180, 90);
+  border-color: rgba(13, 125, 96, 0.5); }
 .cbioportal-frontend .btn-primary:active, .cbioportal-frontend .btn-primary.active, .open > .cbioportal-frontend .btn-primary.dropdown-toggle {
   color: #fff;
-  background-color: #2c6b9a;
+  background-color:  rgb(13);
   background-image: none;
-  border-color: #24577e; }
+  border-color: rgba(13, 125, 96, 0.5); }
 .cbioportal-frontend .btn-primary:active:hover, .cbioportal-frontend .btn-primary:active:focus, .cbioportal-frontend .btn-primary:active.focus, .cbioportal-frontend .btn-primary.active:hover, .cbioportal-frontend .btn-primary.active:focus, .cbioportal-frontend .btn-primary.active.focus, .open > .cbioportal-frontend .btn-primary.dropdown-toggle:hover, .open > .cbioportal-frontend .btn-primary.dropdown-toggle:focus, .open > .cbioportal-frontend .btn-primary.dropdown-toggle.focus {
   color: #fff;
-  background-color: #24577e;
-  border-color: #15344b; }
+  background-color: rgb(78, 180, 90);
+  border-color: rgba(13, 125, 96, 0.5); }
 .cbioportal-frontend .btn-primary.disabled:hover, .cbioportal-frontend .btn-primary.disabled:focus, .cbioportal-frontend .btn-primary.disabled.focus, .cbioportal-frontend .btn-primary[disabled]:hover, .cbioportal-frontend .btn-primary[disabled]:focus, .cbioportal-frontend .btn-primary[disabled].focus, fieldset[disabled] .cbioportal-frontend .btn-primary:hover, fieldset[disabled] .cbioportal-frontend .btn-primary:focus, fieldset[disabled] .cbioportal-frontend .btn-primary.focus {
-  background-color: #3786C2;
-  border-color: #3178ae; }
+  background-color: rgb(78, 180, 90);
+  border-color: rgba(13, 125, 96, 0.5); }
 .cbioportal-frontend .btn-primary .badge {
-  color: #3786C2;
+  color: #F95710;
   background-color: #fff; }
 .cbioportal-frontend .btn-success {
   color: #fff;
@@ -2096,7 +2096,7 @@
   background-color: #fff; }
 .cbioportal-frontend .btn-link {
   font-weight: 400;
-  color: #3786C2;
+  color: #F95710;
   border-radius: 0; }
 .cbioportal-frontend .btn-link, .cbioportal-frontend .btn-link:active, .cbioportal-frontend .btn-link.active, .cbioportal-frontend .btn-link[disabled], fieldset[disabled] .cbioportal-frontend .btn-link {
   background-color: transparent;
@@ -2215,7 +2215,7 @@
 .cbioportal-frontend .dropdown-menu > .active > a, .cbioportal-frontend .dropdown-menu > .active > a:hover, .cbioportal-frontend .dropdown-menu > .active > a:focus {
   color: #fff;
   text-decoration: none;
-  background-color: #3786C2;
+  background-color: #F95710;
   outline: 0; }
 .cbioportal-frontend .dropdown-menu > .disabled > a, .cbioportal-frontend .dropdown-menu > .disabled > a:hover, .cbioportal-frontend .dropdown-menu > .disabled > a:focus {
   color: #777777; }
@@ -2480,7 +2480,7 @@
   background-color: transparent; }
 .cbioportal-frontend .nav .open > a, .cbioportal-frontend .nav .open > a:hover, .cbioportal-frontend .nav .open > a:focus {
   background-color: #eeeeee;
-  border-color: #3786C2; }
+  border-color: #F95710; }
 .cbioportal-frontend .nav .nav-divider {
   height: 1px;
   margin: 9px 0;
@@ -2514,7 +2514,7 @@
   margin-left: 2px; }
 .cbioportal-frontend .nav-pills > li.active > a, .cbioportal-frontend .nav-pills > li.active > a:hover, .cbioportal-frontend .nav-pills > li.active > a:focus {
   color: #fff;
-  background-color: #3786C2; }
+  background-color: #F95710; }
 .cbioportal-frontend .nav-stacked > li {
   float: none; }
 .cbioportal-frontend .nav-stacked > li + li {
@@ -2938,7 +2938,7 @@
   padding: 6px 12px;
   margin-left: -1px;
   line-height: 1.428571429;
-  color: #3786C2;
+  color: #F95710;
   text-decoration: none;
   background-color: #fff;
   border: 1px solid #ddd; }
@@ -2958,8 +2958,8 @@
   z-index: 3;
   color: #fff;
   cursor: default;
-  background-color: #3786C2;
-  border-color: #3786C2; }
+  background-color: #F95710;
+  border-color: #F95710; }
 .cbioportal-frontend .pagination > .disabled > span, .cbioportal-frontend .pagination > .disabled > span:hover, .cbioportal-frontend .pagination > .disabled > span:focus, .cbioportal-frontend .pagination > .disabled > a, .cbioportal-frontend .pagination > .disabled > a:hover, .cbioportal-frontend .pagination > .disabled > a:focus {
   color: #777777;
   cursor: not-allowed;
@@ -3039,7 +3039,7 @@
 .cbioportal-frontend .label-default[href]:hover, .cbioportal-frontend .label-default[href]:focus {
   background-color: #5e5e5e; }
 .cbioportal-frontend .label-primary {
-  background-color: #3786C2; }
+  background-color: #F95710; }
 .cbioportal-frontend .label-primary[href]:hover, .cbioportal-frontend .label-primary[href]:focus {
   background-color: #2c6b9a; }
 .cbioportal-frontend .label-success {
@@ -3080,7 +3080,7 @@
   top: 0;
   padding: 1px 5px; }
 .list-group-item.active > .cbioportal-frontend .badge, .nav-pills > .active > a > .cbioportal-frontend .badge {
-  color: #3786C2;
+  color: #F95710;
   background-color: #fff; }
 .list-group-item > .cbioportal-frontend .badge {
   float: right; }
@@ -3142,7 +3142,7 @@
   padding: 9px;
   color: #333333; }
 .cbioportal-frontend a.thumbnail:hover, .cbioportal-frontend a.thumbnail:focus, .cbioportal-frontend a.thumbnail.active {
-  border-color: #3786C2; }
+  border-color: #F95710; }
 .cbioportal-frontend .alert {
   padding: 15px;
   margin-bottom: 20px;
@@ -3222,7 +3222,7 @@
   line-height: 20px;
   color: #fff;
   text-align: center;
-  background-color: #3786C2;
+  background-color: #F95710;
   -webkit-box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.15);
   box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.15);
   -webkit-transition: width 0.6s ease;
@@ -3319,8 +3319,8 @@
 .cbioportal-frontend .list-group-item.active, .cbioportal-frontend .list-group-item.active:hover, .cbioportal-frontend .list-group-item.active:focus {
   z-index: 2;
   color: #fff;
-  background-color: #3786C2;
-  border-color: #3786C2; }
+  background-color: #F95710;
+  border-color: #F95710; }
 .cbioportal-frontend .list-group-item.active .list-group-item-heading, .cbioportal-frontend .list-group-item.active .list-group-item-heading > small, .cbioportal-frontend .list-group-item.active .list-group-item-heading > .small, .cbioportal-frontend .list-group-item.active:hover .list-group-item-heading, .cbioportal-frontend .list-group-item.active:hover .list-group-item-heading > small, .cbioportal-frontend .list-group-item.active:hover .list-group-item-heading > .small, .cbioportal-frontend .list-group-item.active:focus .list-group-item-heading, .cbioportal-frontend .list-group-item.active:focus .list-group-item-heading > small, .cbioportal-frontend .list-group-item.active:focus .list-group-item-heading > .small {
   color: inherit; }
 .cbioportal-frontend .list-group-item.active .list-group-item-text, .cbioportal-frontend .list-group-item.active:hover .list-group-item-text, .cbioportal-frontend .list-group-item.active:focus .list-group-item-text {
@@ -3523,18 +3523,18 @@
 .cbioportal-frontend .panel-default > .panel-footer + .panel-collapse > .panel-body {
   border-bottom-color: #ddd; }
 .cbioportal-frontend .panel-primary {
-  border-color: #3786C2; }
+  border-color: #F95710; }
 .cbioportal-frontend .panel-primary > .panel-heading {
   color: #fff;
-  background-color: #3786C2;
-  border-color: #3786C2; }
+  background-color: #F95710;
+  border-color: #F95710; }
 .cbioportal-frontend .panel-primary > .panel-heading + .panel-collapse > .panel-body {
-  border-top-color: #3786C2; }
+  border-top-color: #F95710; }
 .cbioportal-frontend .panel-primary > .panel-heading .badge {
-  color: #3786C2;
+  color: #F95710;
   background-color: #fff; }
 .cbioportal-frontend .panel-primary > .panel-footer + .panel-collapse > .panel-body {
-  border-bottom-color: #3786C2; }
+  border-bottom-color: #F95710; }
 .cbioportal-frontend .panel-success {
   border-color: #d6e9c6; }
 .cbioportal-frontend .panel-success > .panel-heading {

@@ -23,7 +23,7 @@ describe('PyMolScriptGenerator', () => {
             backgroundColor: '#EFEFEF',
             baseColor: '#DDDDDD',
             structureColors: {
-                alphaHelix: '#FFA500',
+                alphaHelix: '#F95710',
                 betaSheet: '#0000FF',
                 loop: '#EEEEEE',
             },
@@ -192,8 +192,8 @@ describe('PyMolScriptGenerator', () => {
 
         assert.notEqual(script.indexOf('select (chain B) and (ss h);'), -1);
         assert.isTrue(
-            setColorStub.withArgs('#FFA500').calledOnce,
-            'Alpha helices should be colored with 0xFFA500 when SECONDARY_STRUCTURE is selected'
+            setColorStub.withArgs('#F95710').calledOnce,
+            'Alpha helices should be colored with 0xF95710 when SECONDARY_STRUCTURE is selected'
         );
         assert.notEqual(script.indexOf('select (chain B) and (ss s);'), -1);
         assert.isTrue(

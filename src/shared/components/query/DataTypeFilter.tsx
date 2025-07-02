@@ -76,7 +76,7 @@ export const DataTypeFilter: FunctionComponent<IDataTypeFilterProps> = props => 
                         </label>
                         <label
                             style={{
-                                color: '#3786C2',
+                                color: '#0d7d60',
                                 paddingTop: 5,
                                 float: 'left',
                                 width: 220,
