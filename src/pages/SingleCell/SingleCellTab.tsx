@@ -103,14 +103,14 @@ const testPieData = [
     {
         count: 50,
         value: 'fifty',
-        color: 'blue',
+        color: 'red',
         percentage: 50,
         freq: 'test2',
     },
     {
         count: 100,
         value: 'hundred',
-        color: 'blue',
+        color: 'yellow',
         percentage: 100,
         freq: 'test',
     },
@@ -288,6 +288,22 @@ export default class SingleCellTab extends React.Component<
         this.selectedChart = type;
     }
 
+    @computed get getAxisXLabel() {
+        if (this.horizontalBars) {
+            return 'Sample Count';
+        } else {
+            return 'Cell Type';
+        }
+    }
+
+    @computed get getAxisYLabel() {
+        if (this.horizontalBars) {
+            return 'Cell Type';
+        } else {
+            return 'Sample Count';
+        }
+    }
+
     // Get the single cell data via generic assay
     readonly fetchSingleCellData = remoteData({
         invoke: async () => {
@@ -337,6 +353,7 @@ export default class SingleCellTab extends React.Component<
                             label={'Type of cell'}
                             labelDescription={'dummy'}
                             patientAttribute={true}
+                            disableClickEvents={true}
                         />
                     </div>
                 );
@@ -353,6 +370,8 @@ export default class SingleCellTab extends React.Component<
                             showNAChecked={false}
                             xAxisLabel={'Bins'}
                             yAxisLabel={'Count'}
+                            customLeftPadding={100}
+                            customBottomPadding={100}
                         />
                     </div>
                 );
@@ -376,8 +395,8 @@ export default class SingleCellTab extends React.Component<
                                 'Group C',
                             ]}
                             vertCategoryOrder={['Type 1', 'Type 2', 'Type 3']}
-                            axisLabelX={'Sample Count'}
-                            axisLabelY={'Cell Type'}
+                            axisLabelX={this.getAxisXLabel}
+                            axisLabelY={this.getAxisYLabel}
                             legendLocationWidthThreshold={100}
                             percentage={true}
                             stacked={true}

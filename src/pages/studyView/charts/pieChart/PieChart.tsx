@@ -38,6 +38,7 @@ export interface IPieChartProps {
     patientAttribute: boolean;
     label?: string;
     labelDescription?: string;
+    disableClickEvents?: boolean;
 }
 
 @observer
@@ -77,17 +78,19 @@ export default class PieChart extends React.Component<IPieChartProps, {}>
     }
 
     private get userEvents() {
-        const self = this;
-        return [
-            {
-                target: 'data',
-                eventHandlers: this.pieSliceOnClickEventHandlers,
-            },
-            {
-                target: 'labels',
-                eventHandlers: this.pieSliceOnClickEventHandlers,
-            },
-        ];
+        if (!this.props.disableClickEvents) {
+            const self = this;
+            return [
+                {
+                    target: 'data',
+                    eventHandlers: this.pieSliceOnClickEventHandlers,
+                },
+                {
+                    target: 'labels',
+                    eventHandlers: this.pieSliceOnClickEventHandlers,
+                },
+            ];
+        }
     }
 
     private get pieSliceOnClickEventHandlers() {
