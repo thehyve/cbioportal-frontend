@@ -79,7 +79,6 @@ enum EventKey {
     horz_logScale,
     vert_logScale,
     utilities_horizontalBars,
-    show_NA,
 }
 
 interface Option {
@@ -138,13 +137,6 @@ const testBarChartData: DataBin[] = [
         start: 21,
         end: 30,
         specialValue: 'normal',
-    },
-    {
-        id: 'bin4',
-        count: 30,
-        start: 31,
-        end: NaN,
-        specialValue: 'NA',
     },
 ];
 
@@ -245,7 +237,6 @@ export default class SingleCellTab extends React.Component<
     @observable selectedChart: { label: string; value: string } | null = null;
     @observable selectedMolecularProfile: string;
     @observable horizontalBars = false;
-    @observable showNA = false;
 
     constructor(props: ISingleCellTabProps) {
         super(props);
@@ -264,9 +255,6 @@ export default class SingleCellTab extends React.Component<
         switch (parseInt((event.target as HTMLInputElement).value, 10)) {
             case EventKey.utilities_horizontalBars:
                 this.horizontalBars = !this.horizontalBars;
-                break;
-            case EventKey.show_NA:
-                this.showNA = !this.showNA;
                 break;
         }
     }
@@ -362,7 +350,7 @@ export default class SingleCellTab extends React.Component<
                             height={560}
                             filters={[]}
                             onUserSelection={() => {}}
-                            showNAChecked={this.showNA}
+                            showNAChecked={false}
                             xAxisLabel={'Bins'}
                             yAxisLabel={'Count'}
                         />
@@ -508,22 +496,6 @@ export default class SingleCellTab extends React.Component<
                                     onClick={this.onInputClick}
                                 />{' '}
                                 Horizontal Bars
-                            </label>
-                        </div>
-                    )}
-                    {this.selectedChart?.value ==
-                        ChartTypeSingleCellEnum.BAR_CHART && (
-                        <div className="checkbox">
-                            <label>
-                                <input
-                                    data-test="horizontalBars"
-                                    type="checkbox"
-                                    name="utilities_horizontalBars"
-                                    value={EventKey.show_NA}
-                                    checked={this.showNA}
-                                    onClick={this.onInputClick}
-                                />{' '}
-                                Show NA
                             </label>
                         </div>
                     )}

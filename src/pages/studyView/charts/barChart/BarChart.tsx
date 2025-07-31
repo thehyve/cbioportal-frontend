@@ -42,6 +42,8 @@ export interface IBarChartProps {
     showNAChecked: boolean;
     xAxisLabel?: string;
     yAxisLabel?: string;
+    customBottomPadding?: number;
+    customLeftPadding?: number;
 }
 
 export type BarDatum = {
@@ -191,7 +193,7 @@ export default class BarChart extends React.Component<IBarChartProps, {}>
             this.tickFormat,
             TILT_ANGLE,
             40,
-            10
+            20
         );
     }
 
@@ -319,10 +321,14 @@ export default class BarChart extends React.Component<IBarChartProps, {}>
                         height={this.props.height - this.bottomPadding}
                         width={this.props.width}
                         padding={{
-                            left: 40,
+                            left: this.props.customLeftPadding
+                                ? this.props.customLeftPadding
+                                : 40,
                             right: 20,
                             top: 10,
-                            bottom: this.bottomPadding,
+                            bottom: this.props.customBottomPadding
+                                ? this.props.customBottomPadding
+                                : this.bottomPadding,
                         }}
                         theme={VICTORY_THEME}
                     >
@@ -354,7 +360,7 @@ export default class BarChart extends React.Component<IBarChartProps, {}>
                             style={{
                                 ...(this.props.yAxisLabel && {
                                     axisLabel: {
-                                        padding: 25,
+                                        padding: 50,
                                         fontSize: 15,
                                     },
                                 }),

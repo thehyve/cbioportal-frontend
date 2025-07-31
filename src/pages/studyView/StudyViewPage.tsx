@@ -734,7 +734,6 @@ export default class StudyViewPage extends React.Component<
                                                     </span>
                                                 }
                                             >
-                                                // this here is single cell data
                                                 <LazyHomePage
                                                     store={this.store}
                                                     genericAssayProfiles={
