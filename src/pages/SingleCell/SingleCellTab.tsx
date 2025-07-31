@@ -75,6 +75,12 @@ enum ChartTypeSingleCellEnum {
     BAR_CHART = 'HistogramChart',
 }
 
+enum EventKey {
+    horz_logScale,
+    vert_logScale,
+    utilities_horizontalBars,
+}
+
 interface Option {
     value: string;
     label: string;
@@ -230,6 +236,7 @@ export default class SingleCellTab extends React.Component<
     @observable selectedProfile: { label: string; value: string } | null = null;
     @observable selectedChart: { label: string; value: string } | null = null;
     @observable selectedMolecularProfile: string;
+    @observable horizontalBars = false;
 
     constructor(props: ISingleCellTabProps) {
         super(props);
@@ -240,6 +247,15 @@ export default class SingleCellTab extends React.Component<
         this.singleCellData = jsondata;
         if (this.singleCellData != []) {
             this.jsonDataLoading = false;
+        }
+    }
+
+    @action.bound
+    private onInputClick(event: React.MouseEvent<HTMLInputElement>) {
+        switch (parseInt((event.target as HTMLInputElement).value, 10)) {
+            case EventKey.utilities_horizontalBars:
+                this.horizontalBars = !this.horizontalBars;
+                break;
         }
     }
 
@@ -353,7 +369,7 @@ export default class SingleCellTab extends React.Component<
                             categoryToColor={categoryToColor}
                             barWidth={20}
                             chartBase={800}
-                            horizontalBars={true}
+                            horizontalBars={this.horizontalBars}
                             horzCategoryOrder={[
                                 'Group A',
                                 'Group B',
@@ -467,6 +483,22 @@ export default class SingleCellTab extends React.Component<
                             )}
                         </div>
                     </div>
+                    {this.selectedChart?.value ==
+                        ChartTypeSingleCellEnum.STACKED_BAR_CHART && (
+                        <div className="checkbox">
+                            <label>
+                                <input
+                                    data-test="horizontalBars"
+                                    type="checkbox"
+                                    name="utilities_horizontalBars"
+                                    value={EventKey.utilities_horizontalBars}
+                                    checked={this.horizontalBars}
+                                    onClick={this.onInputClick}
+                                />{' '}
+                                Horizontal Bars
+                            </label>
+                        </div>
+                    )}
                 </div>
                 <div className={'chartArea'}>
                     <div
