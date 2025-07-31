@@ -184,7 +184,7 @@ const testBarPlotData = [
     {
         minorCategory: 'Group A',
         counts: [
-            { majorCategory: 'Type 1', count: 30, percentage: 37.5 },
+            { majorCategory: 'Type 1', count: 30, percentage: 30.0 },
             { majorCategory: 'Type 2', count: 20, percentage: 25.0 },
             { majorCategory: 'Type 3', count: 30, percentage: 37.5 },
         ],
@@ -194,15 +194,15 @@ const testBarPlotData = [
         counts: [
             { majorCategory: 'Type 1', count: 10, percentage: 20.0 },
             { majorCategory: 'Type 2', count: 25, percentage: 50.0 },
-            { majorCategory: 'Type 3', count: 15, percentage: 30.0 },
+            { majorCategory: 'Type 3', count: 15, percentage: 25.0 },
         ],
     },
     {
         minorCategory: 'Group C',
         counts: [
-            { majorCategory: 'Type 1', count: 5, percentage: 10.0 },
-            { majorCategory: 'Type 2', count: 10, percentage: 20.0 },
-            { majorCategory: 'Type 3', count: 35, percentage: 70.0 },
+            { majorCategory: 'Type 1', count: 5, percentage: 50.0 },
+            { majorCategory: 'Type 2', count: 10, percentage: 25.0 },
+            { majorCategory: 'Type 3', count: 35, percentage: 37.5 },
         ],
     },
 ];
@@ -347,12 +347,12 @@ export default class SingleCellTab extends React.Component<
                         <MultipleCategoryBarPlot
                             svgId={'testsvgId'}
                             domainPadding={10}
-                            horzData={testhorzData}
-                            vertData={testvertData}
+                            // horzData={testhorzData}
+                            // vertData={testvertData}
                             plotData={testBarPlotData}
                             categoryToColor={categoryToColor}
                             barWidth={20}
-                            chartBase={30}
+                            chartBase={800}
                             horizontalBars={true}
                             horzCategoryOrder={[
                                 'Group A',
@@ -374,8 +374,8 @@ export default class SingleCellTab extends React.Component<
                             countAxisLabel={'Sample Count'}
                             tooltip={undefined}
                             svgRef={undefined}
-                            pValue={0.1}
-                            qValue={0.05}
+                            // pValue={0.1}
+                            // qValue={0.05}
                         />
                     </div>
                 );
