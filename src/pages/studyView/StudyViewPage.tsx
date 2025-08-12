@@ -680,14 +680,6 @@ export default class StudyViewPage extends React.Component<
                                     getPaginationWidth={() => {
                                         return this.toolbarLeft;
                                     }} // dont run into other study view UI
-                                    contentWindowExtra={
-                                        <HelpWidget
-                                            path={
-                                                this.props.routing.location
-                                                    .pathname
-                                            }
-                                        />
-                                    }
                                     hrefRoot={buildCBioPortalPageUrl('study')}
                                 >
                                     <MSKTab
