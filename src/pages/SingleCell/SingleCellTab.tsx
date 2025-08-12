@@ -138,6 +138,11 @@ const testBarChartData: DataBin[] = [
         end: 30,
         specialValue: 'normal',
     },
+    {
+        id: 'binNA',
+        count: 20,
+        specialValue: 'NA',
+    },
 ];
 
 const testhorzData = [
@@ -237,6 +242,7 @@ export default class SingleCellTab extends React.Component<
     @observable selectedChart: { label: string; value: string } | null = null;
     @observable selectedMolecularProfile: string;
     @observable horizontalBars = false;
+    @observable filterNA: boolean = true;
 
     constructor(props: ISingleCellTabProps) {
         super(props);
@@ -327,6 +333,11 @@ export default class SingleCellTab extends React.Component<
         },
     });
 
+    @action.bound
+    private handleCheckboxChange() {
+        this.filterNA = !this.filterNA;
+    }
+
     @computed
     get chart() {
         // @ts-ignore
@@ -361,13 +372,29 @@ export default class SingleCellTab extends React.Component<
             case ChartTypeSingleCellEnum.BAR_CHART: {
                 return (
                     <div className="borderedChart posRelative">
+                        <label
+                            style={{
+                                display: 'block',
+                                marginBottom: '10px',
+                                marginTop: '10px',
+                                textAlign: 'end',
+                            }}
+                        >
+                            <input
+                                type="checkbox"
+                                checked={this.filterNA}
+                                onChange={this.handleCheckboxChange}
+                            />{' '}
+                            Show NA values
+                        </label>
+
                         <BarChart
                             data={testBarChartData}
                             width={500}
                             height={560}
                             filters={[]}
                             onUserSelection={() => {}}
-                            showNAChecked={false}
+                            showNAChecked={this.filterNA}
                             xAxisLabel={'Counts'}
                             yAxisLabel={'Number Of Samples'}
                             customLeftPadding={100}
