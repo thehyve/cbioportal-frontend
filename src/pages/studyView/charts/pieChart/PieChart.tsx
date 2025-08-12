@@ -68,13 +68,15 @@ export default class PieChart extends React.Component<IPieChartProps, {}>
 
     @autobind
     private onUserSelection(filter: string) {
-        let filters = toJS(this.filters);
-        if (_.includes(filters, filter)) {
-            filters = _.filter(filters, obj => obj !== filter);
-        } else {
-            filters.push(filter);
+        if (!this.props.disableClickEvents) {
+            let filters = toJS(this.filters);
+            if (_.includes(filters, filter)) {
+                filters = _.filter(filters, obj => obj !== filter);
+            } else {
+                filters.push(filter);
+            }
+            this.props.onUserSelection(filters);
         }
-        this.props.onUserSelection(filters);
     }
 
     private get userEvents() {
