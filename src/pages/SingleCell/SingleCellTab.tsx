@@ -103,14 +103,14 @@ const testPieData = [
     {
         count: 50,
         value: 'fifty',
-        color: 'red',
+        color: 'blue',
         percentage: 50,
         freq: 'test2',
     },
     {
         count: 100,
         value: 'hundred',
-        color: 'yellow',
+        color: 'blue',
         percentage: 100,
         freq: 'test',
     },
@@ -368,8 +368,8 @@ export default class SingleCellTab extends React.Component<
                             filters={[]}
                             onUserSelection={() => {}}
                             showNAChecked={false}
-                            xAxisLabel={'Bins'}
-                            yAxisLabel={'Count'}
+                            xAxisLabel={'Counts'}
+                            yAxisLabel={'Number Of Samples'}
                             customLeftPadding={100}
                             customBottomPadding={100}
                         />

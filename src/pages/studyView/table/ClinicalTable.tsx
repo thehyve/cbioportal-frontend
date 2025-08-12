@@ -31,6 +31,7 @@ export interface IClinicalTableProps {
     width?: number;
     height?: number;
     showAddRemoveAllButtons?: boolean;
+    disableCheckBox?: boolean;
 }
 
 class ClinicalTableComponent extends FixedHeaderTable<
@@ -197,6 +198,7 @@ export default class ClinicalTable extends React.Component<
                         onChange={event => {
                             this.onUserSelection(data.value);
                         }}
+                        disabled={this.props.disableCheckBox}
                         labelProps={{
                             style: {
                                 display: 'flex',

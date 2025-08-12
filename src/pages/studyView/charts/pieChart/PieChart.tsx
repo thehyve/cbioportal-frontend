@@ -68,15 +68,13 @@ export default class PieChart extends React.Component<IPieChartProps, {}>
 
     @autobind
     private onUserSelection(filter: string) {
-        if (!this.props.disableClickEvents) {
-            let filters = toJS(this.filters);
-            if (_.includes(filters, filter)) {
-                filters = _.filter(filters, obj => obj !== filter);
-            } else {
-                filters.push(filter);
-            }
-            this.props.onUserSelection(filters);
+        let filters = toJS(this.filters);
+        if (_.includes(filters, filter)) {
+            filters = _.filter(filters, obj => obj !== filter);
+        } else {
+            filters.push(filter);
         }
+        this.props.onUserSelection(filters);
     }
 
     private get userEvents() {
@@ -319,6 +317,7 @@ export default class PieChart extends React.Component<IPieChartProps, {}>
                             filters={this.filters}
                             highlightedRow={this.highlightedRow}
                             onUserSelection={this.props.onUserSelection}
+                            disableCheckBox={this.props.disableClickEvents}
                         />
                     }
                     destroyTooltipOnHide={true}
