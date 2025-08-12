@@ -42,13 +42,14 @@ import './styles.css';
 import { selectable } from 'shared/components/query/styles/styles.module.scss';
 import ComparisonScatterPlot from './ComparisonScatterPlot';
 import BoxPlot from './BoxPlot';
-import { observable, computed, action, makeObservable } from 'mobx';
+import { observable, computed, action, makeObservable, toJS } from 'mobx';
 import { Observer, observer } from 'mobx-react';
 import LoadingIndicator from 'shared/components/loadingIndicator/LoadingIndicator';
 import { remoteData } from 'cbioportal-frontend-commons';
 import { isGenericAssaySelected } from './SingleCellTabUtils';
 import { Sample } from 'cbioportal-ts-api-client/src';
 import { ChartTypeEnum } from 'pages/studyView/StudyViewConfig';
+import { PlotType } from 'shared/components/plots/PlotsTab';
 export interface ISingleCellTabProps {
     store: StudyViewPageStore;
     genericAssayProfiles: any[];
@@ -193,35 +194,35 @@ const testvertData = [
 
 const testBarPlotData = [
     {
-        minorCategory: 'Group A',
+        minorCategory: 'Cell Type A',
         counts: [
-            { majorCategory: 'Type 1', count: 30, percentage: 30.0 },
-            { majorCategory: 'Type 2', count: 20, percentage: 25.0 },
-            { majorCategory: 'Type 3', count: 30, percentage: 37.5 },
+            { majorCategory: 'Sample 1', count: 30, percentage: 30.0 },
+            { majorCategory: 'Sample 2', count: 20, percentage: 25.0 },
+            { majorCategory: 'Sample 3', count: 30, percentage: 37.5 },
         ],
     },
     {
-        minorCategory: 'Group B',
+        minorCategory: 'Cell Type B',
         counts: [
-            { majorCategory: 'Type 1', count: 10, percentage: 20.0 },
-            { majorCategory: 'Type 2', count: 25, percentage: 50.0 },
-            { majorCategory: 'Type 3', count: 15, percentage: 25.0 },
+            { majorCategory: 'Sample 1', count: 10, percentage: 20.0 },
+            { majorCategory: 'Sample 2', count: 25, percentage: 50.0 },
+            { majorCategory: 'Sample 3', count: 15, percentage: 25.0 },
         ],
     },
     {
-        minorCategory: 'Group C',
+        minorCategory: 'Cell Type C',
         counts: [
-            { majorCategory: 'Type 1', count: 5, percentage: 50.0 },
-            { majorCategory: 'Type 2', count: 10, percentage: 25.0 },
-            { majorCategory: 'Type 3', count: 35, percentage: 37.5 },
+            { majorCategory: 'Sample 1', count: 5, percentage: 50.0 },
+            { majorCategory: 'Sample 2', count: 10, percentage: 25.0 },
+            { majorCategory: 'Sample 3', count: 35, percentage: 37.5 },
         ],
     },
 ];
 
 const categoryToColor: { [cat: string]: string } = {
-    'Group A': '#1f77b4',
-    'Group B': '#ff7f0e',
-    'Group C': '#2ca02c',
+    'Cell Type A': '#1f77b4',
+    'Cell Type B': '#ff7f0e',
+    'Cell Type C': '#2ca02c',
 };
 
 const jsondata = require('./jsonData/sample.json');
@@ -298,13 +299,13 @@ export default class SingleCellTab extends React.Component<
         if (this.horizontalBars) {
             return 'Sample Count';
         } else {
-            return 'Cell Type';
+            return 'Sample Type';
         }
     }
 
     @computed get getAxisYLabel() {
         if (this.horizontalBars) {
-            return 'Cell Type';
+            return 'Sample Type';
         } else {
             return 'Sample Count';
         }
@@ -417,13 +418,17 @@ export default class SingleCellTab extends React.Component<
                             chartBase={800}
                             horizontalBars={this.horizontalBars}
                             horzCategoryOrder={[
-                                'Group A',
-                                'Group B',
-                                'Group C',
+                                'Cell Type A',
+                                'Cell Type B',
+                                'Cell Type C',
                             ]}
-                            vertCategoryOrder={['Type 1', 'Type 2', 'Type 3']}
-                            axisLabelX={this.getAxisXLabel}
-                            axisLabelY={this.getAxisYLabel}
+                            vertCategoryOrder={[
+                                'Sample 1',
+                                'Sample 2',
+                                'Sample 3',
+                            ]}
+                            // axisLabelX={this.getAxisXLabel}
+                            // axisLabelY={this.getAxisYLabel}
                             legendLocationWidthThreshold={100}
                             percentage={true}
                             stacked={true}
@@ -433,7 +438,8 @@ export default class SingleCellTab extends React.Component<
                                 fontFamily: 'Arial',
                                 fill: '#333',
                             }}
-                            countAxisLabel={'Sample Count'}
+                            countAxisLabel={'Cell Counts'}
+                            countName={'cell'}
                             tooltip={undefined}
                             svgRef={undefined}
                             // pValue={0.1}
@@ -527,6 +533,27 @@ export default class SingleCellTab extends React.Component<
                                     </div>
                                 </div>
                             )}
+                            {this.dataTypeSelected &&
+                                this.selectedChart?.value ==
+                                    ChartTypeSingleCellEnum.STACKED_BAR_CHART && (
+                                    <div>
+                                        <label className="label-text">
+                                            Filter samples
+                                        </label>
+                                        <Select
+                                            className="Select"
+                                            isClearable={true}
+                                            isSearchable={true}
+                                            value={toJS(['test1', 'test2'])}
+                                            isMulti
+                                            options={['test1', 'test2']}
+                                            // onChange={(options: any[] | null) => {
+                                            //     axisSelection.selectedCategories =
+                                            //         options || [];
+                                            // }}
+                                        />
+                                    </div>
+                                )}
                         </div>
                     </div>
                     {this.selectedChart?.value ==

@@ -54,6 +54,7 @@ export interface IMultipleCategoryBarPlotProps {
     ticksCount?: number;
     axisStyle?: any;
     countAxisLabel?: string;
+    countName?: string;
     tooltip?: (datum: any) => JSX.Element;
     svgRef?: (svgContainer: SVGElement | null) => void;
     pValue: number | null;
@@ -479,6 +480,10 @@ export default class MultipleCategoryBarPlot extends React.Component<
             : { axis: { stroke: '#b3b3b3' } };
     }
 
+    @computed get countName() {
+        return this.props.countName ? this.props.countName : 'sample';
+    }
+
     @computed get categoryAxisStyle() {
         let style = this.axisStyle;
         if (!this.props.stacked) {
@@ -762,7 +767,8 @@ export default class MultipleCategoryBarPlot extends React.Component<
                 <span>{datum.majorCategory}</span>
                 <br />
                 <strong>
-                    {datum.minorCategory}:&nbsp;{datum.count}&nbsp;sample
+                    {datum.minorCategory}:&nbsp;{datum.count}&nbsp;
+                    {this.countName}
                     {datum.count === 1 ? '' : 's'}&nbsp;({datum.percentage}%)
                 </strong>
             </div>
