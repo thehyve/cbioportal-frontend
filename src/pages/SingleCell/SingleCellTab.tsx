@@ -34,7 +34,7 @@ import {
 } from 'cbioportal-ts-api-client';
 import PieChart from 'pages/studyView/charts/pieChart/PieChart';
 import BarChart from 'pages/studyView/charts/barChart/BarChart';
-import MultipleCategoryBarPlot from 'pages/groupComparison/MultipleCategoryBarPlot';
+import MultipleCategoryBarPlot from 'shared/components/plots/MultipleCategoryBarPlot';
 import StackedBarChart from './StackedBarChart';
 import StackToolTip from './StackToolTip';
 import PieToolTip from './PieToolTip';
@@ -80,6 +80,11 @@ enum EventKey {
     horz_logScale,
     vert_logScale,
     utilities_horizontalBars,
+}
+
+export enum SortByOptions {
+    Alphabetically = 'alphabetically',
+    SortByTotalSum = 'SortByTotalSum',
 }
 
 interface Option {
@@ -244,6 +249,8 @@ export default class SingleCellTab extends React.Component<
     @observable selectedMolecularProfile: string;
     @observable horizontalBars = false;
     @observable filterNA: boolean = true;
+    @observable sortByDropDownOptions: { value: string; label: string }[] = [];
+    @observable sortByOption: string = SortByOptions.Alphabetically;
 
     constructor(props: ISingleCellTabProps) {
         super(props);
@@ -257,6 +264,16 @@ export default class SingleCellTab extends React.Component<
         }
     }
 
+    private defaultOptions = [
+        { value: SortByOptions.Alphabetically, label: 'Alphabetically' },
+        { value: SortByOptions.SortByTotalSum, label: 'Number of samples' },
+    ];
+
+    @action.bound
+    private updateDropDownOptions(option: { value: string; label: string }[]) {
+        this.sortByDropDownOptions = [...this.defaultOptions, ...option];
+    }
+
     @action.bound
     private onInputClick(event: React.MouseEvent<HTMLInputElement>) {
         switch (parseInt((event.target as HTMLInputElement).value, 10)) {
@@ -265,6 +282,12 @@ export default class SingleCellTab extends React.Component<
                 break;
         }
     }
+
+    @action.bound
+    private handleSortByChange(option: any) {
+        this.sortByOption = option.value;
+    }
+
 
     @computed get selectedSampleIds(): string[] {
         return this.props.store.selectedSamples.result.map(
@@ -444,6 +467,13 @@ export default class SingleCellTab extends React.Component<
                             svgRef={undefined}
                             // pValue={0.1}
                             // qValue={0.05}
+                            sortByDropDownOptions={
+                                this.sortByDropDownOptions
+                            }
+                            updateDropDownOptions={
+                                this.updateDropDownOptions
+                            }
+                            sortByOption={this.sortByOption}
                         />
                     </div>
                 );
@@ -558,6 +588,19 @@ export default class SingleCellTab extends React.Component<
                     </div>
                     {this.selectedChart?.value ==
                         ChartTypeSingleCellEnum.STACKED_BAR_CHART && (
+                        <>
+                        <div className="form-group">
+                            <label>Sort By</label>
+                                <ReactSelect
+                                    name="Sort By"
+                                    value={this.sortByOption}
+                                    onChange={this.handleSortByChange}
+                                    options={this.sortByDropDownOptions}
+                                    clearable={false}
+                                    searchable={true}
+                                    placeholder="Sort by..."
+                                />
+                        </div>
                         <div className="checkbox">
                             <label>
                                 <input
@@ -571,6 +614,7 @@ export default class SingleCellTab extends React.Component<
                                 Horizontal Bars
                             </label>
                         </div>
+                        </>
                     )}
                 </div>
                 <div className={'chartArea'}>
