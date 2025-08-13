@@ -12,6 +12,7 @@ import SocialAuthButton from '../../shared/components/SocialAuthButton';
 import { Dropdown } from 'react-bootstrap';
 import { DataAccessTokensDropdown } from '../../shared/components/dataAccessTokens/DataAccessTokensDropdown';
 import { getLoadConfig, getServerConfig } from 'config/config';
+import FontAwesome from 'react-fontawesome';
 
 @observer
 export default class PortalHeader extends React.Component<
@@ -79,7 +80,7 @@ export default class PortalHeader extends React.Component<
             {
                 id: 'about',
                 text: 'About',
-                address: 'https://docs.cbioportal.org/about-us/',
+                address: 'https://about.cbioportal.org/',
                 internal: false,
                 hide: () => getServerConfig().skin_show_about_tab === false,
             },
@@ -90,6 +91,21 @@ export default class PortalHeader extends React.Component<
                 address: '/installations',
                 internal: false,
                 hide: () => !getServerConfig().installation_map_url,
+            },
+
+            {
+                id: 'donate',
+                text: (
+                    <>
+                        <span style={{ color: 'red' }}>
+                            <FontAwesome name="heart" />
+                        </span>{' '}
+                        Donate
+                    </>
+                ),
+                address: 'https://docs.cbioportal.org/donate/',
+                internal: false,
+                hide: () => !getServerConfig().skin_show_donate_button === true,
             },
         ];
     }

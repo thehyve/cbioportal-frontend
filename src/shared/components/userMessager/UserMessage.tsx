@@ -36,15 +36,16 @@ if (
         // ADD MESSAGE IN FOLLOWING FORMAT
         // UNIQUE ID IS IMPORTANT B/C WE REMEMBER A MESSAGE HAS BEEN SHOWN
         // BASED ON USERS LOCALSTORAGE
-
-        {
-            dateEnd: 100000000000000,
-            content: `Re-introducing the cBioPortal Newsletter! Subscribe via <a href="https://www.linkedin.com/newsletters/cbioportal-newsletter-7178731490539634689/" target="_blank">LinkedIn</a> or <a href="https://groups.google.com/g/cbioportal-news" target="_blank">Google Groups</a>`,
-            showCondition: routingStore => {
-                return getServerConfig().app_name === 'public-portal';
-            },
-            id: '2024_newsletter_intro',
-        },
+        // TODO: THIS SHOULD BE LOADED FROM CONFIGURATION
+        //
+        // {
+        //     dateEnd: 100000000000000,
+        //     content: `Re-introducing the cBioPortal Newsletter! Subscribe via <a href="https://www.linkedin.com/newsletters/cbioportal-newsletter-7178731490539634689/" target="_blank">LinkedIn</a> or <a href="https://groups.google.com/g/cbioportal-news" target="_blank">Google Groups</a>`,
+        //     showCondition: routingStore => {
+        //         return getServerConfig().app_name === 'public-portal';
+        //     },
+        //     id: '2024_newsletter_intro',
+        // },
     ];
 
     // MSK specific messaging
@@ -52,9 +53,12 @@ if (
         ['cbioportal.mskcc.org'].includes(getBrowserWindow().location.hostname)
     ) {
         MESSAGE_DATA.push({
-            dateEnd: 100000000000000,
-            content: `The <a href="https://cbioportal.mskcc.org/study/summary?id=mskimpact" _target="_blank">MSK-IMPACT cohort</a> now includes additional NLP-derived data elements from the Cancer Data Science Initiative (<a href="https://mskcc.sharepoint.com/sites/pub-CDSI" target="_blank">Read more</a>)`,
-            id: '2023_msk_chord_release',
+            dateEnd: 1000000000000000,
+            content: `During the MSK Epic transition, updates to de-identified
+            clinical data in cBioPortal will be delayed several months, but
+            genomics data will update regularly. For questions, please email <a
+            href="mailto:cdsi@mskcc.org">cdsi@mskcc.org</a>.`,
+            id: '2025_epic_transition_warning',
         });
     }
 }

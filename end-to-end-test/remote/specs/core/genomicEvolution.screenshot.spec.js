@@ -74,6 +74,7 @@ describe('Patient View Genomic Evolution tab screenshot tests', () => {
 
     it('pvge switch to sequential mode', async () => {
         await setCheckboxChecked(true, 'input[data-test="VAFSequentialMode"]');
+        await (await getElement('body')).moveTo({ xOffset: 0, yOffset: 0 });
         const res = await browser.checkElement('[data-test=VAFChartWrapper]');
         assertScreenShotMatch(res);
     });
@@ -86,7 +87,8 @@ describe('Patient View Genomic Evolution tab screenshot tests', () => {
         assertScreenShotMatch(res);
     });
     it('pvge line chart log scale', async () => {
-        await jsApiClick('input[data-test="VAFLogScale"]');
+        await setCheckboxChecked(true, 'input[data-test="VAFLogScale"]');
+        await (await getElement('body')).moveTo({ xOffset: 0, yOffset: 0 });
 
         const res = await browser.checkElement('[data-test=VAFChartWrapper]');
         assertScreenShotMatch(res);
@@ -101,6 +103,7 @@ describe('Patient View Genomic Evolution tab screenshot tests', () => {
         await clickElement(
             'div[data-test="GenomicEvolutionMutationTable"] table tbody > tr:nth-child(2)'
         );
+        await (await getElement('body')).moveTo({ xOffset: 0, yOffset: 0 });
         const res = await browser.checkElement('[data-test=VAFChartWrapper]');
         assertScreenShotMatch(res);
     });

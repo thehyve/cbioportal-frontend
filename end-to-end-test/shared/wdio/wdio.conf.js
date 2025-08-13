@@ -108,8 +108,8 @@ function saveErrorImage(
             fs.mkdirSync(errorDir, 0744);
         }
         const title = test.title.trim().replace(/\s/g, '_');
-        const img = `${errorDir}/${title}.png`;
-        console.log('ERROR SHOT PATH' + img);
+        const img = `${errorDir}${title}.png`;
+        console.log('ERROR SHOT PATH: ' + img);
         browser.saveScreenshot(img);
 
         networkLog[title.trim()] = browser.execute(function() {
@@ -273,7 +273,7 @@ exports.config = {
         ],
     ],
 
-    //port: 9515,
+    //port: 53171,
     // FROM OLD webdriver config
     // capabilities: [
     //     {

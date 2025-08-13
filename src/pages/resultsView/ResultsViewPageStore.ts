@@ -34,7 +34,7 @@ import {
     StructuralVariantFilter,
 } from 'cbioportal-ts-api-client';
 
-import client from 'shared/api/cbioportalClientInstance';
+import { getClient } from 'shared/api/cbioportalClientInstance';
 import {
     cached,
     CanonicalMutationType,
@@ -1093,12 +1093,12 @@ export class ResultsViewPageStore extends AnalysisStore
             this.studyIds,
             this.clinicalAttributes_profiledIn,
             this.clinicalAttributes_comparisonGroupMembership,
-            this.clinicalAttributes_customCharts,
+            this.customAttributes,
             this.samples,
             this.patients,
         ],
         invoke: async () => {
-            const serverAttributes = await client.fetchClinicalAttributesUsingPOST(
+            const serverAttributes = await getClient().fetchClinicalAttributesUsingPOST(
                 {
                     studyIds: this.studyIds.result!,
                 }
@@ -1142,7 +1142,7 @@ export class ResultsViewPageStore extends AnalysisStore
                 ...specialAttributes,
                 ...this.clinicalAttributes_profiledIn.result!,
                 ...this.clinicalAttributes_comparisonGroupMembership.result!,
-                ...this.clinicalAttributes_customCharts.result!,
+                ...this.customAttributes.result!,
             ];
         },
     });
@@ -1151,7 +1151,7 @@ export class ResultsViewPageStore extends AnalysisStore
     readonly mutationsTabClinicalAttributes = remoteData<ClinicalAttribute[]>({
         await: () => [this.studyIds],
         invoke: async () => {
-            const clinicalAttributes = await client.fetchClinicalAttributesUsingPOST(
+            const clinicalAttributes = await getClient().fetchClinicalAttributesUsingPOST(
                 {
                     studyIds: this.studyIds.result!,
                 }
@@ -1187,7 +1187,7 @@ export class ResultsViewPageStore extends AnalysisStore
             this.studyToDataQueryFilter,
             this.clinicalAttributes_profiledIn,
             this.clinicalAttributes_comparisonGroupMembership,
-            this.clinicalAttributes_customCharts,
+            this.customAttributes,
         ],
         invoke: async () => {
             let clinicalAttributeCountFilter: ClinicalAttributeCountFilter;
@@ -1270,7 +1270,7 @@ export class ResultsViewPageStore extends AnalysisStore
                 );
             }
             // add counts for custom chart clinical attributes
-            for (const attr of this.clinicalAttributes_customCharts.result!) {
+            for (const attr of this.customAttributes.result!) {
                 ret[attr.clinicalAttributeId] = attr.data!.filter(
                     d => d.value !== 'NA'
                 ).length;
@@ -1420,7 +1420,7 @@ export class ResultsViewPageStore extends AnalysisStore
                         } as MolecularDataMultipleStudyFilter;
 
                         dataPromises.push(
-                            client.fetchMolecularDataInMultipleMolecularProfilesUsingPOST(
+                            getClient().fetchMolecularDataInMultipleMolecularProfilesUsingPOST(
                                 {
                                     projection:
                                         REQUEST_ARG_ENUM.PROJECTION_DETAILED,
@@ -1538,7 +1538,7 @@ export class ResultsViewPageStore extends AnalysisStore
                     }, []);
 
                 if (sampleIdentifiers.length) {
-                    return client.fetchMolecularDataInMultipleMolecularProfilesUsingPOST(
+                    return getClient().fetchMolecularDataInMultipleMolecularProfilesUsingPOST(
                         {
                             projection: REQUEST_ARG_ENUM.PROJECTION_DETAILED,
                             molecularDataMultipleStudyFilter: {
@@ -1606,7 +1606,7 @@ export class ResultsViewPageStore extends AnalysisStore
                 sampleMolecularIdentifiers.length > 0 &&
                 entrezGeneIds.length > 0
             ) {
-                return client
+                return getClient()
                     .fetchMolecularDataInMultipleMolecularProfilesUsingPOSTWithHttpInfo(
                         {
                             molecularDataMultipleStudyFilter: {
@@ -1769,7 +1769,7 @@ export class ResultsViewPageStore extends AnalysisStore
                 ) {
                     // handle mutation profile
                     promises.push(
-                        client
+                        getClient()
                             .fetchMutationsInMolecularProfileUsingPOSTWithHttpInfo(
                                 {
                                     molecularProfileId,
@@ -1820,7 +1820,7 @@ export class ResultsViewPageStore extends AnalysisStore
                 } else {
                     // handle non-mutation profile
                     promises.push(
-                        client
+                        getClient()
                             .fetchAllMolecularDataInMolecularProfileUsingPOSTWithHttpInfo(
                                 {
                                     molecularProfileId,
@@ -2227,7 +2227,7 @@ export class ResultsViewPageStore extends AnalysisStore
         //      putting more response waiting time in parallel
         await: () => [this.molecularProfilesInStudies],
         invoke: () =>
-            client.fetchGenePanelDataInMultipleMolecularProfilesUsingPOST({
+            getClient().fetchGenePanelDataInMultipleMolecularProfilesUsingPOST({
                 genePanelDataMultipleStudyFilter: {
                     molecularProfileIds: this.molecularProfilesInStudies.result.map(
                         p => p.molecularProfileId
@@ -2723,7 +2723,17 @@ export class ResultsViewPageStore extends AnalysisStore
         default: [],
     });
 
-    readonly clinicalAttributes_customCharts = remoteData({
+    readonly plotClinicalAttributes = remoteData<ExtendedClinicalAttribute[]>({
+        await: () => [this.clinicalAttributes, this.customAttributes],
+        invoke: async () => {
+            return _.filter(
+                this.clinicalAttributes.result!,
+                attr => !this.customAttributes.result!.includes(attr)
+            );
+        },
+    });
+
+    readonly customAttributes = remoteData({
         await: () => [this.sampleMap],
         invoke: async () => {
             let ret: ExtendedClinicalAttribute[] = [];
@@ -3001,7 +3011,7 @@ export class ResultsViewPageStore extends AnalysisStore
                     .value();
                 const allSampleLists = await Promise.all(
                     uniqueStudyIds.map(studyId => {
-                        return client.getAllSampleListsInStudyUsingGET({
+                        return getClient().getAllSampleListsInStudyUsingGET({
                             studyId: studyId,
                             projection: REQUEST_ARG_ENUM.PROJECTION_SUMMARY,
                         });
@@ -3057,7 +3067,7 @@ export class ResultsViewPageStore extends AnalysisStore
     readonly allStudies = remoteData(
         {
             invoke: async () =>
-                await client.getAllStudiesUsingGET({
+                await getClient().getAllStudiesUsingGET({
                     projection: REQUEST_ARG_ENUM.PROJECTION_SUMMARY,
                 }),
         },
@@ -3166,7 +3176,7 @@ export class ResultsViewPageStore extends AnalysisStore
         invoke: () => {
             const sampleListIds = _.values(this.studyToSampleListId.result!);
             if (sampleListIds.length > 0) {
-                return client.fetchSampleListsUsingPOST({ sampleListIds });
+                return getClient().fetchSampleListsUsingPOST({ sampleListIds });
             } else {
                 return Promise.resolve([]);
             }
@@ -3214,7 +3224,7 @@ export class ResultsViewPageStore extends AnalysisStore
             const promises = _.map(
                 this.studyToMolecularProfileDiscreteCna.result,
                 (cnaMolecularProfile, studyId) => {
-                    return client.fetchDiscreteCopyNumbersInMolecularProfileUsingPOST(
+                    return getClient().fetchDiscreteCopyNumbersInMolecularProfileUsingPOST(
                         {
                             discreteCopyNumberEventType: 'HOMDEL_AND_AMP',
                             discreteCopyNumberFilter: {
@@ -3286,15 +3296,19 @@ export class ResultsViewPageStore extends AnalysisStore
                 return Promise.resolve([]);
             }
 
-            return client.fetchMutationsInMultipleMolecularProfilesUsingPOST({
-                projection: REQUEST_ARG_ENUM.PROJECTION_DETAILED,
-                mutationMultipleStudyFilter: {
-                    entrezGeneIds: this.genes.result!.map(g => g.entrezGeneId),
-                    molecularProfileIds: this.mutationProfiles.result!.map(
-                        p => p.molecularProfileId
-                    ),
-                } as MutationMultipleStudyFilter,
-            });
+            return getClient().fetchMutationsInMultipleMolecularProfilesUsingPOST(
+                {
+                    projection: REQUEST_ARG_ENUM.PROJECTION_DETAILED,
+                    mutationMultipleStudyFilter: {
+                        entrezGeneIds: this.genes.result!.map(
+                            g => g.entrezGeneId
+                        ),
+                        molecularProfileIds: this.mutationProfiles.result!.map(
+                            p => p.molecularProfileId
+                        ),
+                    } as MutationMultipleStudyFilter,
+                }
+            );
         },
     });
 
@@ -3970,7 +3984,7 @@ export class ResultsViewPageStore extends AnalysisStore
 
                 if (customSampleListStudyIds.length > 0) {
                     promises.push(
-                        client
+                        getClient()
                             .fetchSamplesUsingPOST({
                                 sampleFilter: {
                                     sampleListIds: customSampleListStudyIds.map(
@@ -3989,7 +4003,7 @@ export class ResultsViewPageStore extends AnalysisStore
                 }
                 if (sampleListIds.length) {
                     promises.push(
-                        client.fetchSamplesUsingPOST({
+                        getClient().fetchSamplesUsingPOST({
                             sampleFilter: {
                                 sampleListIds,
                             } as SampleFilter,
@@ -4245,7 +4259,7 @@ export class ResultsViewPageStore extends AnalysisStore
         {
             await: () => [this.studyIds],
             invoke: async () => {
-                return client.fetchStudiesUsingPOST({
+                return getClient().fetchStudiesUsingPOST({
                     studyIds: this.studyIds.result!,
                     projection: REQUEST_ARG_ENUM.PROJECTION_DETAILED,
                 });
@@ -4294,11 +4308,13 @@ export class ResultsViewPageStore extends AnalysisStore
         {
             await: () => [this.studyIds],
             invoke: async () => {
-                let profiles = await client.fetchMolecularProfilesUsingPOST({
-                    molecularProfileFilter: {
-                        studyIds: this.studyIds.result!,
-                    } as MolecularProfileFilter,
-                });
+                let profiles = await getClient().fetchMolecularProfilesUsingPOST(
+                    {
+                        molecularProfileFilter: {
+                            studyIds: this.studyIds.result!,
+                        } as MolecularProfileFilter,
+                    }
+                );
 
                 // expression profiles are not allowed
                 // under some circumstances
@@ -4949,7 +4965,7 @@ export class ResultsViewPageStore extends AnalysisStore
                             !_.isEmpty(stableIds) &&
                             !_.isEmpty(sampleMolecularIdentifiers)
                         ) {
-                            return client
+                            return getClient()
                                 .fetchGenericAssayDataInMultipleMolecularProfilesUsingPOST(
                                     {
                                         genericAssayDataMultipleStudyFilter: {
@@ -5051,7 +5067,9 @@ export class ResultsViewPageStore extends AnalysisStore
                                     this.uniqueSampleKeyToTumorType.result!,
                                     this.structuralVariantOncoKbData,
                                     this.oncoKbCancerGenes,
-                                    this.usingPublicOncoKbInstance
+                                    this.usingPublicOncoKbInstance,
+                                    this.genomeNexusClient,
+                                    this.genomeNexusInternalClient
                                 );
                                 return map;
                             },
@@ -5656,13 +5674,15 @@ export class ResultsViewPageStore extends AnalysisStore
                 dqf &&
                 ((dqf.sampleIds && dqf.sampleIds.length) || dqf.sampleListId);
             if (hasSampleSpec) {
-                return client.fetchAllMolecularDataInMolecularProfileUsingPOST({
-                    molecularProfileId: q.molecularProfileId,
-                    molecularDataFilter: {
-                        entrezGeneIds: [q.entrezGeneId],
-                        ...dqf,
-                    } as MolecularDataFilter,
-                });
+                return getClient().fetchAllMolecularDataInMolecularProfileUsingPOST(
+                    {
+                        molecularProfileId: q.molecularProfileId,
+                        molecularDataFilter: {
+                            entrezGeneIds: [q.entrezGeneId],
+                            ...dqf,
+                        } as MolecularDataFilter,
+                    }
+                );
             } else {
                 return Promise.resolve([]);
             }
@@ -5693,7 +5713,7 @@ export class ResultsViewPageStore extends AnalysisStore
         this.coverageInformation,
         this.filteredSampleKeyToSample,
         this.filteredPatientKeyToPatient,
-        this.clinicalAttributes_customCharts
+        this.customAttributes
     );
 
     public mutationCache = new MobxPromiseCache<
@@ -5725,7 +5745,7 @@ export class ResultsViewPageStore extends AnalysisStore
                         }
 
                         if (molecularProfileId) {
-                            return client.fetchMutationsInMolecularProfileUsingPOST(
+                            return getClient().fetchMutationsInMolecularProfileUsingPOST(
                                 {
                                     molecularProfileId,
                                     mutationFilter: {

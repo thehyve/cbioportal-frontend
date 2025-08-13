@@ -478,6 +478,27 @@ describe('group comparison page screenshot tests', () => {
             assertScreenShotMatch(res);
         });
 
+        it('group comparison page mutations tab two groups no mutations types selected', async () => {
+            await goToUrlAndSetLocalStorage(
+                `${CBIOPORTAL_URL}/comparison/mutations?sessionId=5cf89323e4b0ab413787436c&selectedEnrichmentEventTypes=%5B"HOMDEL"%2C"AMP"%2C"structural_variant"%5D`
+            );
+            await (
+                await getElement('.borderedChart svg', {
+                    timeout: 20000,
+                })
+            ).waitForDisplayed({
+                timeout: 20000,
+            });
+            const res = await browser.checkElement(
+                '[data-test="ComparisonPageMutationsTabPlot"]',
+                '',
+                {
+                    viewportChangePause: 4000,
+                }
+            ); // hide these things because the timing of data loading makes this test so flaky
+            assertScreenShotMatch(res);
+        });
+
         it('group comparison page mutations tab three groups first unselected', async () => {
             await goToUrlAndSetLocalStorage(
                 `${CBIOPORTAL_URL}/comparison/mutations?comparisonId=634006c24dd45f2bc4c3d4aa&unselectedGroups=%5B"Colon%20Adenocarcinoma"%5D`
@@ -826,6 +847,45 @@ describe('group comparison page screenshot tests', () => {
                 'div[data-test="ComparisonPageOverlapTabDiv"]',
                 'disablePointerEvents',
                 0
+            );
+            assertScreenShotMatch(res);
+        });
+    });
+
+    describe('clinical tab categorical table', () => {
+        before(async () => {
+            await goToUrlAndSetLocalStorage(
+                `${CBIOPORTAL_URL}/comparison?sessionId=67a22dd583e9543d61940572`
+            );
+            await (
+                await getElement('div[data-test="ComparisonPageOverlapTabDiv"]')
+            ).waitForDisplayed({ timeout: 60000 });
+        });
+
+        it('group comparison page clinical tab race plot type table', async () => {
+            assert(
+                await (await getElement('a.tabAnchor_clinical')).isDisplayed()
+            );
+            await clickElement('a.tabAnchor_clinical');
+            await (
+                await getElement(
+                    'div[data-test="ComparisonPageClinicalTabDiv"] div[data-test="ClinicalTabPlotDiv"]'
+                )
+            ).waitForDisplayed({ timeout: 20000 });
+            await clickElement(
+                'div[data-test="ComparisonPageClinicalTabDiv"] span[data-test="Race"]'
+            );
+            await setInputText(
+                '[data-test="plotTypeSelector"] .Select-input input',
+                'Table'
+            );
+            await clickElement('[data-test="plotTypeSelector"] .Select-option');
+
+            await (await getElement('body')).moveTo({ xOffset: 0, yOffset: 0 });
+            const res = await browser.checkElement(
+                'div[data-test="ComparisonPageClinicalTabDiv"] div[data-test="ClinicalTabPlotDiv"]',
+                '',
+                { hide: ['.qtip'] }
             );
             assertScreenShotMatch(res);
         });

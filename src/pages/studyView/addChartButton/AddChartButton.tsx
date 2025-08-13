@@ -63,6 +63,7 @@ export interface IAddChartTabsProps {
     disableCustomTab?: boolean;
     disableGeneSpecificTab?: boolean;
     disableGenericAssayTabs?: boolean;
+    disableVariantAnnotationsTab?: boolean;
     onInfoMessageChange?: (newMessage: string) => void;
     showResetPopup: () => void;
     openShareCustomDataUrlModal: (chartIds: string[]) => void;
@@ -96,6 +97,7 @@ export enum TabNamesEnum {
     CLINICAL = 'Clinical',
     GENOMIC = 'Genomic',
     GENE_SPECIFIC = 'Gene Specific',
+    VARIANT_ANNOTATIONS = 'Variant Annotations',
 }
 
 @observer
@@ -124,6 +126,7 @@ class AddChartTabs extends React.Component<IAddChartTabsProps, {}> {
         disableCustomTab: false,
         disableGeneSpecificTab: false,
         disableGenericAssayTabs: false,
+        disableVariantAnnotationsTab: false,
     };
 
     constructor(props: IAddChartTabsProps, context: any) {
@@ -266,6 +269,18 @@ class AddChartTabs extends React.Component<IAddChartTabsProps, {}> {
     }
 
     @computed
+    get namespaceChartOptions(): ChartOption[] {
+        const namespaceDataOptions = getOptionsByChartMetaDataType(
+            this.groupedChartMetaByDataType[
+                ChartMetaDataTypeEnum.VARIANT_ANNOTATIONS
+            ] || [],
+            this.selectedAttrs,
+            _.fromPairs(this.props.store.chartsType.toJSON())
+        );
+        return namespaceDataOptions;
+    }
+
+    @computed
     get geneSpecificChartOptions(): ChartOption[] {
         const genomicDataOptions = getOptionsByChartMetaDataType(
             this.groupedChartMetaByDataType[
@@ -365,7 +380,7 @@ class AddChartTabs extends React.Component<IAddChartTabsProps, {}> {
         return (
             this.props.disableGenericAssayTabs ||
             !this.props.store.genericAssayProfiles.isComplete ||
-            !this.props.store.genericAssayEntitiesGroupedByProfileId
+            !this.props.store.genericAssayEntitiesGroupedByProfileIdSuffix
                 .isComplete ||
             (this.props.store.genericAssayProfiles.isComplete &&
                 _.isEmpty(this.props.store.genericAssayProfiles.result))
@@ -526,6 +541,28 @@ class AddChartTabs extends React.Component<IAddChartTabsProps, {}> {
     }
 
     @computed
+    private get variantAnnotationsTab() {
+        return (
+            <MSKTab
+                key={4}
+                id={ChartMetaDataTypeEnum.VARIANT_ANNOTATIONS}
+                linkText={TabNamesEnum.VARIANT_ANNOTATIONS}
+                hide={this.namespaceChartOptions.length === 0}
+                className="addVariantAnnotationChartTab"
+            >
+                <AddChartByType
+                    width={this.getTabsWidth}
+                    options={this.namespaceChartOptions}
+                    freqPromise={this.dataCount}
+                    onAddAll={this.onAddAll}
+                    onClearAll={this.onClearAll}
+                    onToggleOption={this.onToggleOption}
+                />
+            </MSKTab>
+        );
+    }
+
+    @computed
     private get genericAssayTabs() {
         let tabs = [];
         // create one tab for each generic assay type
@@ -536,25 +573,17 @@ class AddChartTabs extends React.Component<IAddChartTabsProps, {}> {
                 // And one tab can only has one selected profile at a time
                 // selectedGenericAssayProfileIdByType been initialzed at the begining
                 // so we know we can always find a selected profile for each Generic Assay type
-                const molecularProfileIdsInType =
-                    options.find(
-                        option =>
-                            option.value ===
-                            this.selectedGenericAssayProfileIdByType.get(type)
-                    )?.profileIds || [];
+                const molecularProfileIdSuffix = this.selectedGenericAssayProfileIdByType.get(
+                    type
+                )!;
 
-                const entityMap = molecularProfileIdsInType.reduce(
-                    (acc, profileId) => {
-                        this.props.store.genericAssayEntitiesGroupedByProfileId.result![
-                            profileId
-                        ].forEach(meta => {
-                            acc[meta.stableId] = meta;
-                        });
-                        return acc;
-                    },
-                    {} as { [stableId: string]: GenericAssayMeta }
+                const entityMap = _.keyBy(
+                    this.props.store
+                        .genericAssayEntitiesGroupedByProfileIdSuffix.result![
+                        molecularProfileIdSuffix
+                    ],
+                    meta => meta.stableId
                 );
-
                 const genericAssayEntityOptions = _.map(
                     entityMap,
                     makeGenericAssayOption
@@ -937,6 +966,25 @@ class AddChartTabs extends React.Component<IAddChartTabsProps, {}> {
                                             allSamples={
                                                 this.props.store.samples.result
                                             }
+                                            // contentNormalizer={content => {
+                                            //     return content
+                                            //         .split(
+                                            //             /[, ]+/
+                                            //         ) // Split the content by either commas or spaces
+                                            //         .map(
+                                            //             line =>
+                                            //                 line.trim()
+                                            //         ) // Remove extra spaces around each line
+                                            //         .filter(
+                                            //             line =>
+                                            //                 line.length >
+                                            //                 0
+                                            //         ) // Remove empty lines
+                                            //         .join(
+                                            //             '\n'
+                                            //         ); // Use newline as the final delimiter
+                                            // }}
+
                                             selectedSamples={
                                                 this.props.store.selectedSamples
                                                     .result
@@ -1042,6 +1090,8 @@ class AddChartTabs extends React.Component<IAddChartTabsProps, {}> {
                             )}
                         </div>
                     </MSKTab>
+                    {!this.props.disableVariantAnnotationsTab &&
+                        this.variantAnnotationsTab}
                     <MSKTab
                         id={'X_Vs_Y'}
                         linkText={
@@ -1055,7 +1105,7 @@ class AddChartTabs extends React.Component<IAddChartTabsProps, {}> {
                                 </strong>
                             </span>
                         }
-                        key={4}
+                        key={5}
                     >
                         <div
                             style={{
@@ -1158,7 +1208,8 @@ export default class AddChartButton extends React.Component<
         return (
             this.props.store.genericAssayProfileOptionsByType.isPending ||
             this.props.store.molecularProfileOptions.isPending ||
-            this.props.store.genericAssayEntitiesGroupedByProfileId.isPending
+            this.props.store.genericAssayEntitiesGroupedByProfileIdSuffix
+                .isPending
         );
     }
 
@@ -1195,6 +1246,9 @@ export default class AddChartButton extends React.Component<
                         }
                         disableGenericAssayTabs={
                             this.props.disableGenericAssayTabs
+                        }
+                        disableVariantAnnotationsTab={
+                            this.props.disableVariantAnnotationsTab
                         }
                         disableCustomTab={this.props.disableCustomTab}
                         showResetPopup={this.props.showResetPopup}

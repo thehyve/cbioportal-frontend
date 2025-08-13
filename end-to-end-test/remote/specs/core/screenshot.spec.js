@@ -8,7 +8,6 @@ const {
     getElement,
     COEXPRESSION_TIMEOUT,
     clickElement,
-    getElementByTestHandle,
     waitForElementDisplayed,
 } = require('../../../shared/specUtils_Async');
 
@@ -23,20 +22,22 @@ async function waitForAndCheckPlotsTab() {
     const res = await browser.checkElement(
         'div[data-test="PlotsTabEntireDiv"]'
     );
-    await assertScreenShotMatch(res);
+    assertScreenShotMatch(res);
 }
 
 function runResultsTestSuite(prefix, options = {}) {
     it(`${prefix} render the oncoprint`, async function() {
         await waitForOncoprint();
+        await (await getElement('body')).moveTo({ xOffset: 0, yOffset: 0 }); // move mouse out of the way
+        browser.pause(100);
         const res = await checkElementWithMouseDisabled('.oncoprintContainer');
         assertScreenShotMatch(res);
     });
 
     it(`${prefix} igv_tab tab`, async function() {
         await clickElement('a.tabAnchor_cnSegments');
-        await getElement('.igv-column-container', { timeout: 20000 });
-        const res = await browser.checkElement('.pillTabs');
+        await (await getElement('.igv-column-container')).waitForDisplayed();
+        const res = await checkElementWithMouseDisabled('.pillTabs');
         assertScreenShotMatch(res);
     });
 
@@ -148,6 +149,7 @@ function runResultsTestSuite(prefix, options = {}) {
             await getElement('div[data-test="GroupComparisonMRNAEnrichments"]')
         ).waitForDisplayed();
         await clickElement(options.mrnaEnrichmentsRowSelector || 'b=ETV5');
+        await (await getElement('body')).moveTo({ xOffset: 0, yOffset: 0 });
         await waitForElementDisplayed('div[data-test="MiniBoxPlot"]');
         const res = await browser.checkElement(
             'div[data-test="ComparisonTabDiv"]'
@@ -351,11 +353,14 @@ describe('enrichments tab screenshot tests', function() {
         await (
             await browser.$('.comparisonTabSubTabs .tabAnchor_mrna')
         ).waitForDisplayed();
-
         await clickElement('.comparisonTabSubTabs .tabAnchor_mrna');
-        await clickElement('a=mRNA');
 
+        await waitForElementDisplayed(
+            'div[data-test="GroupComparisonMRNAEnrichments"]'
+        );
         await clickElement('b=MERTK');
+        await (await getElement('body')).moveTo({ xOffset: 0, yOffset: 0 });
+        await waitForElementDisplayed('div[data-test="MiniBoxPlot"]');
 
         const res = await browser.checkElement(
             'div[data-test="ComparisonTabDiv"]'
@@ -368,7 +373,7 @@ describe('enrichments tab screenshot tests', function() {
 describe('result page tabs, loading from session id', function() {
     before(async function() {
         // only run these tests if session service is enabled
-        if (sessionServiceIsEnabled() === false) {
+        if ((await sessionServiceIsEnabled()) === false) {
             this.skip();
         }
 

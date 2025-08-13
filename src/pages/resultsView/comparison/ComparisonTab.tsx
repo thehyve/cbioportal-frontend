@@ -82,6 +82,7 @@ export default class ComparisonTab extends React.Component<
                 return (
                     <div style={{ minWidth: 355, width: 355, zIndex: 20 }}>
                         <ReactSelect
+                            aria-label="Overlap Strategy Selection"
                             name="select overlap strategy"
                             onChange={(option: any | null) => {
                                 if (option) {
@@ -146,8 +147,8 @@ export default class ComparisonTab extends React.Component<
             return (
                 <MSKTabs
                     unmountOnHide={false}
-                    activeTabId={this.props.urlWrapper.comparisonSubTabId}
-                    onTabClick={this.props.urlWrapper.setComparisonSubTabId}
+                    activeTabId={this.props.urlWrapper.subTab}
+                    onTabClick={this.props.urlWrapper.setSubTab}
                     className="secondaryNavigation comparisonTabSubTabs"
                 >
                     <MSKTab id={GroupComparisonTab.OVERLAP} linkText="Overlap">

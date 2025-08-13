@@ -8,14 +8,13 @@ import {
     MolecularProfile,
     SampleIdentifier,
 } from 'cbioportal-ts-api-client';
-import { MobxPromise, remoteData } from 'cbioportal-frontend-commons';
+import { MobxPromise } from 'cbioportal-frontend-commons';
 import { CancerGene } from 'oncokb-ts-api-client';
 import {
     VariantAnnotation,
     GenomeNexusAPI,
     GenomeNexusAPIInternal,
 } from 'genome-nexus-ts-api-client';
-import { fetchCosmicData } from 'shared/lib/StoreUtils';
 import MutationCountCache from 'shared/cache/MutationCountCache';
 import ClinicalAttributeCache from 'shared/cache/ClinicalAttributeCache';
 import DiscreteCNACache from 'shared/cache/DiscreteCNACache';
@@ -34,7 +33,6 @@ import {
 import { MutationTableColumnType } from 'shared/components/mutationTable/MutationTable';
 import GnomadColumnFormatter from 'shared/components/mutationTable/column/GnomadColumnFormatter';
 import DbsnpColumnFormatter from 'shared/components/mutationTable/column/DbsnpColumnFormatter';
-import CosmicColumnFormatter from 'shared/components/mutationTable/column/CosmicColumnFormatter';
 import MutationCountColumnFormatter from 'shared/components/mutationTable/column/MutationCountColumnFormatter';
 import ExonColumnFormatter from 'shared/components/mutationTable/column/ExonColumnFormatter';
 import StudyColumnFormatter from 'shared/components/mutationTable/column/StudyColumnFormatter';
@@ -135,11 +133,6 @@ export default class ResultsViewMutationMapperStore extends MutationMapperStore 
         //labelMobxPromises(this);
     }
 
-    readonly cosmicData = remoteData({
-        await: () => [this.mutationData],
-        invoke: () => fetchCosmicData(this.mutationData),
-    });
-
     protected getDownloadDataFetcher(): MutationTableDownloadDataFetcher {
         return new MutationTableDownloadDataFetcher(
             this.mutationData,
@@ -168,7 +161,6 @@ export default class ResultsViewMutationMapperStore extends MutationMapperStore 
             MutationTableColumnType.END_POS,
             MutationTableColumnType.NUM_MUTATIONS,
             MutationTableColumnType.EXON,
-            MutationTableColumnType.COSMIC,
             MutationTableColumnType.GNOMAD,
         ]);
 
@@ -184,11 +176,6 @@ export default class ResultsViewMutationMapperStore extends MutationMapperStore 
             MutationTableColumnType.EXON
         ] = createNumericalFilter((d: Mutation) =>
             ExonColumnFormatter.getSortValue([d], this.getGenomeNexusCache())
-        );
-        this.mutationMapperStoreConfig['filterAppliersOverride']![
-            MutationTableColumnType.COSMIC
-        ] = createNumericalFilter((d: Mutation) =>
-            CosmicColumnFormatter.getSortValue([d], this.cosmicData.result)
         );
 
         this.mutationsTabClinicalAttributes.result?.forEach(attribute => {
