@@ -10,7 +10,6 @@ export const ServerConfigDefaults: Partial<IServerConfig> = {
     genomenexus_website_url: 'https://www.genomenexus.org',
     genomenexus_isoform_override_source: 'mskcc',
     g2s_url: 'https://g2s.genomenexus.org',
-    mycancergenome_show: false,
 
     digital_slide_archive_iframe_url: 'https://cancer.digitalslidearchive.org/',
     digital_slide_archive_meta_url:
@@ -40,7 +39,7 @@ export const ServerConfigDefaults: Partial<IServerConfig> = {
     oncoprint_hide_vus_default: false,
     oncokb_public_api_url: 'oncokb.org/api/v1',
     oncokb_merge_icons_by_default: true,
-
+    oncoprint_defaultview: 'patient',
     pubmed_url: 'https://www.ncbi.nlm.nih.gov/pubmed/<%=pmid%>',
 
     show_hotspot: true,
@@ -244,7 +243,11 @@ export const ServerConfigDefaults: Partial<IServerConfig> = {
 
     skin_study_view_show_sv_table: false,
 
+    clickhouse_mode: false,
+
     download_custom_buttons_json: '',
+
+    feature_study_export: false,
 };
 
 export default ServerConfigDefaults;

@@ -42,6 +42,7 @@ export interface IPaginationControlsProps {
     groupButtons?: boolean;
     hidePaginationIfOnePage?: boolean;
     bsStyle?: 'default' | 'primary' | 'success' | 'info' | 'warning';
+    isResultLimitedAtMaxPage?: boolean;
 }
 
 @observer
@@ -142,6 +143,7 @@ export class PaginationControls extends React.Component<
                     id="showMoreButton"
                     bsSize="sm"
                     disabled={
+                        this.props.isResultLimitedAtMaxPage ||
                         !this.props.itemsPerPageOptions ||
                         !this.props.itemsPerPage ||
                         !this.props.totalItems ||
@@ -221,6 +223,12 @@ export class PaginationControls extends React.Component<
                             : styles['margin-right-button']
                     )}
                     bsStyle={this.props.bsStyle}
+                    aria-label={
+                        typeof this.props.firstButtonContent === 'string' &&
+                        !!this.props.firstButtonContent
+                            ? undefined
+                            : 'View First Page'
+                    }
                 >
                     {this.props.firstButtonContent}
                 </Button>
@@ -237,6 +245,12 @@ export class PaginationControls extends React.Component<
                 disabled={!!this.props.previousPageDisabled}
                 onClick={this.props.onPreviousPageClick}
                 bsStyle={this.props.bsStyle}
+                aria-label={
+                    typeof this.props.previousButtonContent === 'string' &&
+                    !!this.props.previousButtonContent
+                        ? undefined
+                        : 'View Previous Page'
+                }
             >
                 {this.props.previousButtonContent}
             </Button>,
@@ -253,6 +267,12 @@ export class PaginationControls extends React.Component<
                 disabled={!!this.props.nextPageDisabled}
                 onClick={this.props.onNextPageClick}
                 bsStyle={this.props.bsStyle}
+                aria-label={
+                    typeof this.props.nextButtonContent === 'string' &&
+                    !!this.props.nextButtonContent
+                        ? undefined
+                        : 'View Next Page'
+                }
             >
                 {this.props.nextButtonContent}
             </Button>,
@@ -268,6 +288,12 @@ export class PaginationControls extends React.Component<
                             : styles['margin-left-button']
                     )}
                     bsStyle={this.props.bsStyle}
+                    aria-label={
+                        typeof this.props.lastButtonContent === 'string' &&
+                        !!this.props.lastButtonContent
+                            ? undefined
+                            : 'View Last Page'
+                    }
                 >
                     {this.props.lastButtonContent}
                 </Button>

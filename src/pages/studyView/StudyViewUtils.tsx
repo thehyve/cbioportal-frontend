@@ -3,6 +3,7 @@ import { SingleGeneQuery } from 'shared/lib/oql/oql-parser';
 import {
     BinsGeneratorConfig,
     CancerStudy,
+    CBioPortalAPIInternal,
     ClinicalAttribute,
     ClinicalData,
     ClinicalDataBin,
@@ -22,13 +23,18 @@ import {
     GenomicDataCount,
     MolecularDataMultipleStudyFilter,
     MolecularProfile,
+    NamespaceAttribute,
+    NamespaceDataFilter,
     NumericGeneMolecularData,
+    OredPatientTreatmentFilters,
     Patient,
     PatientIdentifier,
+    PatientTreatmentReport,
     PatientTreatmentRow,
     Sample,
     SampleClinicalDataCollection,
     SampleIdentifier,
+    SampleTreatmentReport,
     SampleTreatmentRow,
     StructuralVariantFilterQuery,
     StudyViewFilter,
@@ -47,7 +53,9 @@ import {
 } from './StudyViewPageStore';
 import { StudyViewPageTabKeyEnum } from 'pages/studyView/StudyViewPageTabs';
 import { Layout } from 'react-grid-layout';
-import internalClient from 'shared/api/cbioportalInternalClientInstance';
+import internalClient, {
+    getInternalClient,
+} from 'shared/api/cbioportalInternalClientInstance';
 import defaultClient from 'shared/api/cbioportalClientInstance';
 import client from 'shared/api/cbioportalClientInstance';
 import {
@@ -142,6 +150,7 @@ export enum SpecialChartsUniqueKeyEnum {
     SELECTED_COMPARISON_GROUPS = 'SELECTED_COMPARISON_GROUPS',
     CANCER_STUDIES = 'CANCER_STUDIES',
     MUTATION_COUNT = 'MUTATION_COUNT',
+    VARIANT_ANNOTATIONS = 'VARIANT_ANNOTATIONS',
     FRACTION_GENOME_ALTERED = 'FRACTION_GENOME_ALTERED',
     GENOMIC_PROFILES_SAMPLE_COUNT = 'GENOMIC_PROFILES_SAMPLE_COUNT',
     CASE_LISTS_SAMPLE_COUNT = 'CASE_LISTS_SAMPLE_COUNT',
@@ -169,10 +178,12 @@ export enum ChartMetaDataTypeEnum {
     GENOMIC = 'Genomic',
     GENE_SPECIFIC = 'Gene_Specific',
     GENERIC_ASSAY = 'Generic_Assay',
+    VARIANT_ANNOTATIONS = 'Variant_Annotations',
 }
 
 export type ChartMeta = {
     clinicalAttribute?: ClinicalAttribute;
+    namespaceAttribute?: NamespaceAttribute;
     genericAssayType?: string;
     mutationOptionType?: string;
     uniqueKey: string;
@@ -245,7 +256,7 @@ export const SPECIAL_CHARTS: ChartMetaWithDimensionAndChartType[] = [
     },
     {
         uniqueKey: SpecialChartsUniqueKeyEnum.GENOMIC_PROFILES_SAMPLE_COUNT,
-        displayName: 'Genomic Profile Sample Counts',
+        displayName: 'Data Types',
         description: '',
         chartType: ChartTypeEnum.GENOMIC_PROFILES_TABLE,
         dataType: ChartMetaDataTypeEnum.GENOMIC,
@@ -811,6 +822,25 @@ export function getUniqueKey(attribute: ClinicalAttribute): string {
     return attribute.clinicalAttributeId;
 }
 
+export function getUniqueNamespaceKey(attribute: NamespaceAttribute): string {
+    return attribute.outerKey.concat('_', attribute.innerKey);
+}
+
+function getNamespaceChartDisplayName(
+    attribute: NamespaceAttribute,
+    namespaceAttributes: NamespaceAttribute[]
+): string {
+    const innerKey = attribute.innerKey.split('_').join(' ');
+    if (
+        namespaceAttributes.filter(item => attribute.innerKey === item.innerKey)
+            .length > 1
+    ) {
+        return `${innerKey} (${attribute.outerKey})`;
+    } else {
+        return innerKey;
+    }
+}
+
 export function getGenomicChartUniqueKey(
     hugoGeneSymbol: string,
     profileType: string,
@@ -903,7 +933,8 @@ export function getVirtualStudyDescription(
     attributeNamesSet: { [id: string]: string },
     molecularProfileNameSet: { [id: string]: string },
     caseListNameSet: { [key: string]: string },
-    user?: string
+    user?: string,
+    hideSampleCounts: boolean = false
 ) {
     let descriptionLines: string[] = [];
     const createdOnStr = 'Created on';
@@ -917,18 +948,24 @@ export function getVirtualStudyDescription(
             _.flatMap(studyWithSamples, study => study.uniqueSampleKeys)
         );
         descriptionLines.push(
-            `${uniqueSampleKeys.length} sample${
-                uniqueSampleKeys.length > 1 ? 's' : ''
-            } from ${studyWithSamples.length} ${
-                studyWithSamples.length > 1 ? 'studies:' : 'study:'
-            }`
+            (hideSampleCounts
+                ? 'Samples'
+                : `${uniqueSampleKeys.length} sample${
+                      uniqueSampleKeys.length > 1 ? 's' : ''
+                  }`) +
+                ` from ${studyWithSamples.length} ${
+                    studyWithSamples.length > 1 ? 'studies:' : 'study:'
+                }`
         );
         //add individual studies sample count
         studyWithSamples.forEach(studyObj => {
             descriptionLines.push(
-                `- ${studyObj.name} (${
-                    studyObj.uniqueSampleKeys.length
-                } sample${uniqueSampleKeys.length > 1 ? 's' : ''})`
+                `- ${studyObj.name}` +
+                    (hideSampleCounts
+                        ? ''
+                        : ` (${studyObj.uniqueSampleKeys.length} sample${
+                              uniqueSampleKeys.length > 1 ? 's' : ''
+                          })`)
             );
         });
         //add filters
@@ -1092,6 +1129,7 @@ export function isFiltered(
             _.isEmpty(filter.genomicProfiles) &&
             _.isEmpty(filter.genomicDataFilters) &&
             _.isEmpty(filter.mutationDataFilters) &&
+            _.isEmpty(filter.namespaceDataFilters) &&
             _.isEmpty(filter.genericAssayDataFilters) &&
             _.isEmpty(filter.caseLists) &&
             _.isEmpty(filter.customDataFilters) &&
@@ -1658,7 +1696,7 @@ export function intervalFiltersDisplayValue(
                     }
                 }}
                 numericOnly={true}
-                allowEmptyValue={true}
+                allowEmptyValue={false}
                 textFieldAppearance={true}
             />
         );
@@ -1688,7 +1726,7 @@ export function intervalFiltersDisplayValue(
                     return true;
                 }}
                 numericOnly={true}
-                allowEmptyValue={true}
+                allowEmptyValue={false}
                 textFieldAppearance={true}
             />
         );
@@ -1710,7 +1748,7 @@ export function intervalFiltersDisplayValue(
                     }
                 }}
                 numericOnly={true}
-                allowEmptyValue={true}
+                allowEmptyValue={false}
                 textFieldAppearance={true}
             />
         );
@@ -1849,7 +1887,8 @@ export function correctColumnWidth(columnWidth: number) {
 
 export function getFrequencyStr(value: number) {
     let str = '';
-    if (value < 0) {
+
+    if (value < 0 || _.isNaN(value)) {
         return Datalabel.NA;
     } else if (value === 0) {
         str = '0';
@@ -1888,6 +1927,11 @@ export function getExponent(value: number): number {
 }
 
 export function getCNAByAlteration(alteration: string | number) {
+    // "NA" here actually means "Not Profiled"
+    // See details in https://github.com/cBioPortal/cbioportal/issues/10809
+    if (alteration === 'NA') {
+        return 'Not Profiled';
+    }
     const numberValue = Number(alteration);
     return !isNaN(numberValue) ? CNA_TO_ALTERATION[numberValue] || '' : 'NA';
 }
@@ -2435,6 +2479,7 @@ export function getOptionsByChartMetaDataType(
         if (isSharedCustomData) {
             chartOption.isSharedChart = isSharedCustomData(chartMeta.uniqueKey);
         }
+
         return chartOption;
     });
 }
@@ -2539,7 +2584,7 @@ export function getSamplesByExcludingFiltersOnChart(
             updatedFilter.sampleIdentifiers = queriedSampleIdentifiers;
         }
     }
-    return internalClient.fetchFilteredSamplesUsingPOST({
+    return getInternalClient().fetchFilteredSamplesUsingPOST({
         studyViewFilter: updatedFilter,
     });
 }
@@ -3182,7 +3227,7 @@ export async function getAllClinicalDataByStudyViewFilter(
     const [remoteClinicalDataCollection, totalItems]: [
         SampleClinicalDataCollection,
         number
-    ] = await internalClient
+    ] = await getInternalClient()
         .fetchClinicalDataClinicalTableUsingPOSTWithHttpInfo({
             studyViewFilter,
             pageSize: pageSize | 500,
@@ -4073,7 +4118,7 @@ export async function invokeGenericAssayDataCount(
     chartInfo: GenericAssayChart,
     filters: StudyViewFilter
 ) {
-    const result: GenericAssayDataCountItem[] = await internalClient.fetchGenericAssayDataCountsUsingPOST(
+    const result: GenericAssayDataCountItem[] = await getInternalClient().fetchGenericAssayDataCountsUsingPOST(
         {
             genericAssayDataCountFilter: {
                 genericAssayDataFilters: [
@@ -4135,12 +4180,16 @@ export async function invokeGenomicDataCount(
                 projection: 'SUMMARY',
             },
         };
-        result = await internalClient.fetchMutationDataCountsUsingPOST(params);
+        result = await getInternalClient().fetchMutationDataCountsUsingPOST(
+            params
+        );
         getDisplayedValue = transformMutatedType;
         getDisplayedColor = (value: string) =>
             getMutationColorByCategorization(transformMutatedType(value));
     } else {
-        result = await internalClient.fetchGenomicDataCountsUsingPOST(params);
+        result = await getInternalClient().fetchGenomicDataCountsUsingPOST(
+            params
+        );
         getDisplayedValue = getCNAByAlteration;
         getDisplayedColor = (value: string | number) =>
             getCNAColorByAlteration(getCNAByAlteration(value));
@@ -4194,7 +4243,7 @@ export async function invokeMutationDataCount(
         },
     } as any;
 
-    const result = await internalClient.fetchMutationDataCountsUsingPOST(
+    const result = await getInternalClient().fetchMutationDataCountsUsingPOST(
         params
     );
 
@@ -4217,6 +4266,53 @@ export async function invokeMutationDataCount(
                 numberOfAlteredCases: c.uniqueCount,
                 numberOfProfiledCases: profiledCases,
                 totalCount: c.count,
+            } as MultiSelectionTableRow;
+        });
+    }
+
+    return counts;
+}
+
+export async function invokeNamespaceDataCount(
+    chartMeta: ChartMeta,
+    filters: StudyViewFilter,
+    profiledCases: number
+) {
+    const params = {
+        namespaceDataCountFilter: {
+            attributes: [
+                {
+                    outerKey: chartMeta.namespaceAttribute!.outerKey,
+                    innerKey: chartMeta.namespaceAttribute!.innerKey,
+                } as NamespaceDataFilter,
+            ],
+            studyViewFilter: filters,
+        },
+    };
+
+    const result = await internalClient.fetchNamespaceDataCountsUsingPOST(
+        params
+    );
+
+    const data = result.find(
+        d =>
+            d.outerKey === chartMeta.namespaceAttribute!.outerKey &&
+            d.innerKey === chartMeta.namespaceAttribute!.innerKey
+    );
+
+    let counts: MultiSelectionTableRow[] = [];
+    if (data !== undefined) {
+        counts = data.counts.map(c => {
+            return {
+                uniqueKey: c.value,
+                label: c.value,
+                // "Altered" and "Profiled" really just mean
+                //  "numerator" and "denominator" in percent
+                //  calculation of table. Here, they mean
+                //  "# filtered samples in profile" and "# filtered samples overall"
+                numberOfAlteredCases: c.count,
+                numberOfProfiledCases: profiledCases,
+                totalCount: c.totalCount,
             } as MultiSelectionTableRow;
         });
     }
@@ -4536,26 +4632,29 @@ export async function getGenesCNADownloadData(
 }
 
 export async function getPatientTreatmentDownloadData(
-    promise: MobxPromise<PatientTreatmentRow[]>
+    promise: MobxPromise<PatientTreatmentReport>
 ): Promise<string> {
     if (promise.result) {
         const header = ['Treatment', '#'];
         let data = [header.join('\t')];
-        _.each(promise.result, (record: PatientTreatmentRow) => {
-            let rowData = [record.treatment, record.count];
-            data.push(rowData.join('\t'));
-        });
+        _.each(
+            promise.result.patientTreatments,
+            (record: PatientTreatmentRow) => {
+                let rowData = [record.treatment, record.count];
+                data.push(rowData.join('\t'));
+            }
+        );
         return data.join('\n');
     } else return '';
 }
 
 export async function getSampleTreatmentDownloadData(
-    promise: MobxPromise<SampleTreatmentRow[]>
+    promise: MobxPromise<SampleTreatmentReport>
 ): Promise<string> {
     if (promise.result) {
         const header = ['Treatment', 'Pre/Post', '#'];
         let data = [header.join('\t')];
-        _.each(promise.result, (record: SampleTreatmentRow) => {
+        _.each(promise.result.treatments, (record: SampleTreatmentRow) => {
             let rowData = [record.treatment, record.time, record.count];
             data.push(rowData.join('\t'));
         });
@@ -4593,6 +4692,30 @@ export async function getMutationTypesDownloadData(
     } else return '';
 }
 
+export async function getVariantAnnotationTypesDownloadData(
+    promise: MobxPromise<MultiSelectionTableRow[]>
+): Promise<string> {
+    if (promise.result) {
+        let header = ['Annotation', '# VA', '#', 'Profiled Samples', 'Freq'];
+        let data = [header.join('\t')];
+        _.each(promise.result, (record: MultiSelectionTableRow) => {
+            let rowData = [
+                record.label,
+                record.totalCount,
+                record.numberOfAlteredCases,
+                record.numberOfProfiledCases,
+                getFrequencyStr(
+                    (record.numberOfAlteredCases /
+                        record.numberOfProfiledCases) *
+                        100
+                ),
+            ];
+            data.push(rowData.join('\t'));
+        });
+        return data.join('\n');
+    } else return '';
+}
+
 export function getChartMetaSet(
     customCharts: ObservableMap<string, ChartMeta>,
     molecularProfiles: MolecularProfile[],
@@ -4600,6 +4723,7 @@ export function getChartMetaSet(
     genericAssayCharts: ObservableMap<string, ChartMeta>,
     XvsYCharts: ObservableMap<string, ChartMeta>,
     clinicalAttributes: ClinicalAttribute[],
+    namespaceAttributes: NamespaceAttribute[],
     survivalPlots: SurvivalType[],
     mutationProfiles: MolecularProfile[],
     structuralVariantProfiles: MolecularProfile[],
@@ -4671,6 +4795,29 @@ export function getChartMetaSet(
         {}
     );
 
+    const namespaceAttributeChartMetaSet = _.reduce(
+        namespaceAttributes,
+        (acc: { [id: string]: ChartMeta }, attribute) => {
+            const uniqueKey = getUniqueNamespaceKey(attribute);
+            const displayName = getNamespaceChartDisplayName(
+                attribute,
+                namespaceAttributes
+            );
+            acc[uniqueKey] = {
+                displayName: displayName,
+                uniqueKey: uniqueKey,
+                dataType: ChartMetaDataTypeEnum.VARIANT_ANNOTATIONS,
+                patientAttribute: false,
+                description: `${attribute.outerKey}.${attribute.innerKey} from all profiles`,
+                priority: 99,
+                renderWhenDataChange: false,
+                namespaceAttribute: attribute,
+            };
+            return acc;
+        },
+        {}
+    );
+
     const chartMetaSet = {
         ...customChartMetaSet,
         ...geneSpecificChartMetaSet,
@@ -4678,6 +4825,7 @@ export function getChartMetaSet(
         ...XvsYChartMetaSet,
         ...clinicalAttributeChartMetaSet,
         ...survivalPlotChartMetaSet,
+        ...namespaceAttributeChartMetaSet,
     };
 
     if (shouldDisplayClinicalEventTypeCounts) {
@@ -4877,4 +5025,51 @@ export function getVisibleAttributes(
         },
         []
     );
+}
+
+// this function takes legacy patient treatment data and puts it in the form
+// of the clickhouse treatment report.  it makes the new code backward
+// compatible.  when rfc80 is complete this should be removed
+export async function getPatientTreatmentReport(
+    filter: StudyViewFilter,
+    tier: any,
+    client: CBioPortalAPIInternal
+) {
+    const legacyData = await client.getAllPatientTreatmentsUsingPOST({
+        studyViewFilter: filter,
+        tier,
+    });
+    const totalPatients = _(legacyData)
+        .flatMap(r => r.samples)
+        .map(r => r.patientId)
+        .uniq()
+        .value().length;
+    const resp: PatientTreatmentReport = {
+        patientTreatments: legacyData,
+        totalSamples: 0, // this is always zero, should be cleaned up in backend and deleted
+        totalPatients,
+    };
+    return resp;
+}
+
+// like the above, this function takes legacy patient treatment data and puts it in the form
+// of the clickhouse treatment report.  it makes the new code backward
+// compatible.  when rfc80 is complete this should be removed
+export async function getSampleTreatmentReport(
+    filter: StudyViewFilter,
+    tier: any,
+    client: CBioPortalAPIInternal
+) {
+    const old = await client.getAllSampleTreatmentsUsingPOST({
+        studyViewFilter: filter,
+    });
+    const resp: SampleTreatmentReport = {
+        treatments: old,
+        totalSamples: _(old)
+            .flatMap(r => r.samples)
+            .map(r => r.sampleId)
+            .uniq()
+            .value().length,
+    };
+    return resp;
 }

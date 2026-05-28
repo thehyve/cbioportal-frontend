@@ -296,10 +296,12 @@ export default class StudyList extends QueryStoreComponent<
                 icon: string;
                 onClick?: string | (() => void);
                 tooltip?: string;
+                ariaLabel?: string;
             }[] = [
                 {
                     icon: 'info-circle',
                     tooltip: '',
+                    ariaLabel: `View study info tooltip for ${study.name}`,
                 },
             ];
 
@@ -315,6 +317,7 @@ export default class StudyList extends QueryStoreComponent<
             } else {
                 links.push({
                     icon: 'book',
+                    ariaLabel: `Open ${study.name} in PubMed`,
                     onClick: study.pmid && getPubMedUrl(study.pmid),
                     tooltip: study.pmid && 'PubMed',
                 });
@@ -340,6 +343,7 @@ export default class StudyList extends QueryStoreComponent<
                         if (link.onClick) {
                             let anchorProps: any = {
                                 key: i,
+                                'aria-label': link.ariaLabel,
                             };
                             if (typeof link.onClick === 'string') {
                                 anchorProps.href = link.onClick;
@@ -389,34 +393,43 @@ export default class StudyList extends QueryStoreComponent<
                                     placement="top"
                                     iconType={IconType.INFO_ICON}
                                 >
-                                    <a>{content}</a>
+                                    <a
+                                        role={'tooltip'}
+                                        aria-label={`Display study info tooltip for ${study.name}`}
+                                    >
+                                        {content}
+                                    </a>
                                 </StudyTagsTooltip>
                             );
                         }
 
                         return content;
                     })}
-                    {study.studyId && (
-                        <DefaultTooltip
-                            mouseEnterDelay={0}
-                            placement="top"
-                            overlay={
-                                <div className={styles.tooltip}>
-                                    View clinical and genomic data of this study
-                                </div>
-                            }
-                        >
-                            <span>
-                                <StudyLink
-                                    studyId={study.studyId}
-                                    className={classNames(
-                                        styles.summaryIcon,
-                                        'ci ci-pie-chart'
-                                    )}
-                                />
-                            </span>
-                        </DefaultTooltip>
-                    )}
+                    {study.studyId &&
+                        (study.readPermission === true ||
+                            study.readPermission === undefined) && (
+                            <DefaultTooltip
+                                mouseEnterDelay={0}
+                                placement="top"
+                                overlay={
+                                    <div className={styles.tooltip}>
+                                        View clinical and genomic data of this
+                                        study
+                                    </div>
+                                }
+                            >
+                                <span>
+                                    <StudyLink
+                                        studyId={study.studyId}
+                                        studyName={study.name}
+                                        className={classNames(
+                                            styles.summaryIcon,
+                                            'ci ci-pie-chart'
+                                        )}
+                                    />
+                                </span>
+                            </DefaultTooltip>
+                        )}
                     {getServerConfig()
                         .skin_home_page_show_unauthorized_studies &&
                         study.studyId &&

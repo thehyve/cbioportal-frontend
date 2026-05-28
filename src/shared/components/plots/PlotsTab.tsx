@@ -18,6 +18,7 @@ import _ from 'lodash';
 import {
     axisHasNegativeNumbers,
     boxPlotTooltip,
+    CUSTOM_ATTR_DATA_TYPE,
     CLIN_ATTR_DATA_TYPE,
     CNA_STROKE_WIDTH,
     dataTypeDisplayOrder,
@@ -107,7 +108,7 @@ import {
     scatterPlotSize,
 } from '../../../shared/components/plots/PlotUtils';
 import { getTablePlotDownloadData } from '../../../shared/components/plots/TablePlotUtils';
-import MultipleCategoryBarPlot from 'pages/groupComparison/MultipleCategoryBarPlot';
+import MultipleCategoryBarPlot from 'shared/components/plots/MultipleCategoryBarPlot';
 import { RESERVED_CLINICAL_VALUE_COLORS } from 'shared/lib/Colors';
 import {
     DownloadControlOption,
@@ -174,6 +175,7 @@ enum EventKey {
     utilities_horizontalBars,
     utilities_showRegressionLine,
     utilities_viewLimitValues,
+    utilities_connectSamples,
     sortByMedian,
 }
 
@@ -209,10 +211,16 @@ export enum DiscreteVsDiscretePlotType {
     Table = 'Table',
 }
 
+export enum SortByOptions {
+    Alphabetically = 'alphabetically',
+    SortByTotalSum = 'SortByTotalSum',
+}
+
 export enum MutationCountBy {
     MutationType = 'MutationType',
     MutatedVsWildType = 'MutatedVsWildType',
     DriverVsVUS = 'DriverVsVUS',
+    VariantAlleleFrequency = 'VariantAlleleFrequency',
 }
 
 export enum StructuralVariantCountBy {
@@ -277,6 +285,7 @@ export interface IPlotsTabProps {
     sampleKeyToSample: MobxPromise<_.Dictionary<Sample>>;
     genes: MobxPromise<Gene[]>;
     clinicalAttributes: MobxPromise<ExtendedClinicalAttribute[]>;
+    customAttributes: MobxPromise<ExtendedClinicalAttribute[]>;
     genesets: MobxPromise<Geneset[]>;
     genericAssayEntitiesGroupByMolecularProfileId: MobxPromise<{
         [profileId: string]: GenericAssayMeta[];
@@ -384,6 +393,10 @@ export type PlotsTabGeneOption = {
     label: string; // hugo symbol
 };
 
+export type SampleIdsForPatientIds = {
+    [patientId: string]: string[];
+};
+
 const searchInputTimeoutMs = 600;
 
 class PlotsTabScatterPlot extends ScatterPlot<IScatterPlotData> {}
@@ -405,6 +418,10 @@ const mutationCountByOptions = [
     { value: MutationCountBy.MutationType, label: 'Mutation Type' },
     { value: MutationCountBy.MutatedVsWildType, label: 'Mutated vs Wild-type' },
     { value: MutationCountBy.DriverVsVUS, label: 'Driver vs VUS' },
+    {
+        value: MutationCountBy.VariantAlleleFrequency,
+        label: 'Variant Allele Freqency',
+    },
 ];
 const structuralVariantCountByOptions = [
     {
@@ -440,7 +457,8 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
     private dummyScrollPane: HTMLDivElement;
     private scrollingDummyPane = false;
     @observable plotElementWidth = 0;
-
+    @observable sortByDropDownOptions: { value: string; label: string }[] = [];
+    @observable sortByOption: string = SortByOptions.Alphabetically;
     @observable boxPlotSortByMedian = false;
     @observable.ref searchCaseInput: string;
     @observable.ref searchMutationInput: string;
@@ -452,6 +470,7 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
     @observable percentageBar = false;
     @observable stackedBar = false;
     @observable viewLimitValues: boolean = true;
+    @observable connectSamples: boolean = false;
     @observable _waterfallPlotSortOrder: string | undefined = undefined;
 
     @observable searchCase: string = '';
@@ -462,6 +481,16 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
     >({}, { deep: false });
     @observable _horzGenericAssaySearchText: string = '';
     @observable _vertGenericAssaySearchText: string = '';
+
+    private defaultOptions = [
+        { value: SortByOptions.Alphabetically, label: 'Alphabetically' },
+        { value: SortByOptions.SortByTotalSum, label: 'Number of samples' },
+    ];
+
+    @action.bound
+    private updateDropDownOptions(option: { value: string; label: string }[]) {
+        this.sortByDropDownOptions = [...this.defaultOptions, ...option];
+    }
 
     @action.bound
     private onClickLegendItem(ld: LegendDataWithId<any>) {
@@ -512,6 +541,61 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
                 !this.coloringMenuSelection.colorByStructuralVariant
             );
         }
+    }
+
+    @computed get patientIdsInBoxPlot(): string[] {
+        let patientIds: string[] = [];
+
+        if (this.boxPlotData.isComplete && this.boxPlotData.result) {
+            const uniqueSampleKeys = _.flatten(
+                _.map(this.boxPlotData.result.data, dataPoint =>
+                    _.map(dataPoint.data, point => point.uniqueSampleKey)
+                )
+            );
+
+            patientIds = _.uniq(
+                uniqueSampleKeys
+                    .map(
+                        sampleKey =>
+                            this.props.sampleKeyToSample.result![sampleKey]
+                                ?.patientId
+                    )
+                    .filter(Boolean)
+            );
+        }
+        return patientIds;
+    }
+
+    @computed get samplesForEachPatient(): SampleIdsForPatientIds[] {
+        const samplesForPatients: SampleIdsForPatientIds[] = [];
+
+        if (this.patientIdsInBoxPlot && this.patientIdsInBoxPlot.length > 0) {
+            this.patientIdsInBoxPlot.forEach(patientId => {
+                const sampleIdsForPatient: SampleIdsForPatientIds = {
+                    [patientId]: [],
+                };
+
+                this.boxPlotData.result?.data.forEach(dataPoint => {
+                    dataPoint.data.forEach(point => {
+                        const sample = this.props.sampleKeyToSample.result![
+                            point.uniqueSampleKey
+                        ];
+                        if (sample && sample.patientId === patientId) {
+                            sampleIdsForPatient[patientId].push(point.sampleId);
+                        }
+                    });
+                });
+                samplesForPatients.push(sampleIdsForPatient);
+            });
+        }
+
+        // if atleast one patient has multiple samples, return the array of sample IDs for each patient, otherwise []
+        const hasPatientWithMultipleSamples = samplesForPatients.some(
+            patientObject =>
+                patientObject[Object.keys(patientObject)[0]].length > 1
+        );
+
+        return hasPatientWithMultipleSamples ? samplesForPatients : [];
     }
 
     // determine whether formatting for points in the scatter plot (based on
@@ -656,7 +740,6 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
         let vertAxisStudies: CancerStudy[] = [];
         let isHorzAxisNoneOptionSelected = false;
         let isVertAxisNoneOptionSelected = false;
-
         components.push(
             <div>
                 <div>Data availability per profile/axis:</div>
@@ -678,6 +761,31 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
                 ) {
                     const attributes = this
                         .clinicalAttributesGroupByclinicalAttributeId.result![
+                        this.horzSelection.dataSourceId
+                    ];
+                    const studyIds = attributes.map(
+                        attribute => attribute.studyId
+                    );
+                    horzAxisStudies = this.props.studies.result.filter(study =>
+                        studyIds.includes(study.studyId)
+                    );
+                    components.push(
+                        <div>
+                            <strong>Horizontal Axis: </strong>
+                            {`${horzAxisDataSampleCount} samples from ${
+                                horzAxisStudies.length
+                            } ${Pluralize('study', horzAxisStudies.length)}`}
+                        </div>
+                    );
+                }
+                break;
+            case CUSTOM_ATTR_DATA_TYPE:
+                if (
+                    this.horzSelection.dataSourceId !== undefined &&
+                    this.customAttributesGroupByclinicalAttributeId.isComplete
+                ) {
+                    const attributes = this
+                        .customAttributesGroupByclinicalAttributeId.result![
                         this.horzSelection.dataSourceId
                     ];
                     const studyIds = attributes.map(
@@ -730,6 +838,31 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
             // when no datatype is selected (`None`)
             case NONE_SELECTED_OPTION_STRING_VALUE:
                 isVertAxisNoneOptionSelected = true;
+                break;
+            case CUSTOM_ATTR_DATA_TYPE:
+                if (
+                    this.vertSelection.dataSourceId !== undefined &&
+                    this.customAttributesGroupByclinicalAttributeId.isComplete
+                ) {
+                    const attributes = this
+                        .customAttributesGroupByclinicalAttributeId.result![
+                        this.vertSelection.dataSourceId
+                    ];
+                    const studyIds = attributes.map(
+                        attribute => attribute.studyId
+                    );
+                    vertAxisStudies = this.props.studies.result.filter(study =>
+                        studyIds.includes(study.studyId)
+                    );
+                    components.push(
+                        <div>
+                            <strong>Vertical Axis: </strong>
+                            {`${vertAxisDataSampleCount} samples from ${
+                                vertAxisStudies.length
+                            } ${Pluralize('study', vertAxisStudies.length)}`}
+                        </div>
+                    );
+                }
                 break;
             case CLIN_ATTR_DATA_TYPE:
                 if (
@@ -798,9 +931,27 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
             </div>
         );
 
+        const isHorzAxisVAF =
+            this.horzSelection.dataType ===
+                AlterationTypeConstants.MUTATION_EXTENDED &&
+            this.horzSelection.mutationCountBy ===
+                MutationCountBy.VariantAlleleFrequency;
+
+        const isVertAxisVAF =
+            this.vertSelection.dataType ===
+                AlterationTypeConstants.MUTATION_EXTENDED &&
+            this.vertSelection.mutationCountBy ===
+                MutationCountBy.VariantAlleleFrequency;
+
+        let mainMessage = `Showing ${axisOverlapSampleCount} samples with data in both profiles (axes)`;
+        if (isHorzAxisVAF || isVertAxisVAF) {
+            mainMessage +=
+                '. Samples without mutations or Variant Allele Frequency data are excluded from the plot';
+        }
+
         components = [
             <div className="alert alert-info dataAvailabilityAlert">
-                {`Showing ${axisOverlapSampleCount} samples with data in both profiles (axes)`}
+                {mainMessage}
                 <div data-test="dataAvailabilityAlertInfoIcon">
                     <InfoIcon tooltip={<div>{components}</div>} />
                 </div>
@@ -1121,9 +1272,10 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
                     this._selectedGenesetOption &&
                     this._selectedGenesetOption.value ===
                         SAME_SELECTED_OPTION_STRING_VALUE &&
-                    self.horzSelection.dataType === CLIN_ATTR_DATA_TYPE
+                    (self.horzSelection.dataType === CLIN_ATTR_DATA_TYPE ||
+                        self.horzSelection.dataType === CUSTOM_ATTR_DATA_TYPE)
                 ) {
-                    // if vertical gene set option is "same as horizontal", and horizontal is clinical, then use the actual
+                    // if vertical gene set option is "same as horizontal", and horizontal is clinical or custom, then use the actual
                     //      gene set option value instead of "Same gene" option value, because that would be slightly weird UX
                     return self.horzSelection.selectedGenesetOption;
                 } else {
@@ -1195,9 +1347,10 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
                     this._selectedGenericAssayOption &&
                     this._selectedGenericAssayOption.value ===
                         SAME_SELECTED_OPTION_STRING_VALUE &&
-                    self.horzSelection.dataType === CLIN_ATTR_DATA_TYPE
+                    (self.horzSelection.dataType === CLIN_ATTR_DATA_TYPE ||
+                        self.horzSelection.dataType === CUSTOM_ATTR_DATA_TYPE)
                 ) {
-                    // if vertical gene set option is "same as horizontal", and horizontal is clinical, then use the actual
+                    // if vertical gene set option is "same as horizontal", and horizontal is clinical or custom, then use the actual
                     //      gene set option value instead of "Same gene" option value, because that would be slightly weird UX
                     return self.horzSelection.selectedGenericAssayOption;
                 } else {
@@ -1712,9 +1865,16 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
                 break;
             case EventKey.utilities_horizontalBars:
                 this.horizontalBars = !this.horizontalBars;
+                this.handleSortByChange({
+                    value: SortByOptions.Alphabetically,
+                    label: 'Alphabetically',
+                });
                 break;
             case EventKey.utilities_viewLimitValues:
                 this.viewLimitValues = !this.viewLimitValues;
+                break;
+            case EventKey.utilities_connectSamples:
+                this.connectSamples = !this.connectSamples;
                 break;
             case EventKey.sortByMedian:
                 this.boxPlotSortByMedian = !this.boxPlotSortByMedian;
@@ -2063,10 +2223,45 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
         },
     });
 
+    readonly clinicalAndCustomAttributes = remoteData<
+        ExtendedClinicalAttribute[]
+    >({
+        await: () => [
+            this.props.clinicalAttributes,
+            this.props.customAttributes,
+        ],
+        invoke: () => {
+            return Promise.resolve([
+                ...this.props.clinicalAttributes.result!,
+                ...this.props.customAttributes.result!,
+            ]);
+        },
+    });
+
+    readonly clinicalAttributeOptions = remoteData({
+        await: () => [this.props.clinicalAttributes],
+        invoke: () =>
+            Promise.resolve(
+                makeClinicalAttributeOptions(
+                    this.props.clinicalAttributes.result!
+                )
+            ),
+    });
+
+    readonly customAttributeOptions = remoteData({
+        await: () => [this.props.customAttributes],
+        invoke: () =>
+            Promise.resolve(
+                makeClinicalAttributeOptions(
+                    this.props.customAttributes.result!
+                )
+            ),
+    });
+
     readonly coloringMenuOmnibarOptions = remoteData<
         (ColoringMenuOmnibarOption | ColoringMenuOmnibarGroup)[]
     >({
-        await: () => [this.props.genes, this.props.clinicalAttributes],
+        await: () => [this.props.genes, this.clinicalAndCustomAttributes],
         invoke: () => {
             const allOptions: (
                 | Omit<ColoringMenuOmnibarOption, 'value'>
@@ -2088,7 +2283,7 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
 
             allOptions.push({
                 label: 'Clinical Attributes',
-                options: this.props.clinicalAttributes
+                options: this.clinicalAndCustomAttributes
                     .result!.filter(a => {
                         return (
                             a.clinicalAttributeId !==
@@ -2104,7 +2299,6 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
                         };
                     }),
             });
-
             if (allOptions.length > 0) {
                 // add 'None' option to the top of the list to allow removing coloring of samples
                 allOptions.unshift({
@@ -2365,6 +2559,7 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
             dataType !== NONE_SELECTED_OPTION_STRING_VALUE &&
             dataType !== GENESET_DATA_TYPE &&
             dataType !== CLIN_ATTR_DATA_TYPE &&
+            dataType !== CUSTOM_ATTR_DATA_TYPE &&
             !isGenericAssaySelected
         );
     }
@@ -2408,12 +2603,27 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
     readonly clinicalAttributeIdToClinicalAttribute = remoteData<{
         [clinicalAttributeId: string]: ClinicalAttribute;
     }>({
-        await: () => [this.props.clinicalAttributes, this.props.studyIds],
+        await: () => [this.props.studyIds, this.props.clinicalAttributes],
         invoke: () => {
             let _map: {
                 [clinicalAttributeId: string]: ClinicalAttribute;
             } = _.keyBy(
-                this.props.clinicalAttributes.result,
+                this.props.clinicalAttributes.result!,
+                c => c.clinicalAttributeId
+            );
+            return Promise.resolve(_map);
+        },
+    });
+
+    readonly customAttributeIdToClinicalAttribute = remoteData<{
+        [clinicalAttributeId: string]: ClinicalAttribute;
+    }>({
+        await: () => [this.props.studyIds, this.props.customAttributes],
+        invoke: () => {
+            let _map: {
+                [clinicalAttributeId: string]: ClinicalAttribute;
+            } = _.keyBy(
+                this.props.customAttributes.result!,
                 c => c.clinicalAttributeId
             );
             return Promise.resolve(_map);
@@ -2427,21 +2637,25 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
         invoke: () => {
             return Promise.resolve(
                 _.groupBy(
-                    this.props.clinicalAttributes.result,
+                    this.props.clinicalAttributes.result!,
                     c => c.clinicalAttributeId
                 )
             );
         },
     });
 
-    readonly clinicalAttributeOptions = remoteData({
-        await: () => [this.props.clinicalAttributes],
-        invoke: () =>
-            Promise.resolve(
-                makeClinicalAttributeOptions(
-                    this.props.clinicalAttributes.result!
+    readonly customAttributesGroupByclinicalAttributeId = remoteData<{
+        [clinicalAttributeId: string]: ClinicalAttribute[];
+    }>({
+        await: () => [this.props.customAttributes],
+        invoke: () => {
+            return Promise.resolve(
+                _.groupBy(
+                    this.props.customAttributes.result!,
+                    c => c.clinicalAttributeId
                 )
-            ),
+            );
+        },
     });
 
     readonly dataTypeOptions = remoteData<PlotsTabOption[]>({
@@ -2450,6 +2664,7 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
             this.clinicalAttributeOptions,
             this.props.molecularProfilesInStudies,
             this.props.genesets,
+            this.customAttributeOptions,
         ],
         invoke: () => {
             const profiles = this.props.molecularProfilesWithData.result!;
@@ -2474,6 +2689,10 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
             if (this.clinicalAttributeOptions.result!.length) {
                 // add "clinical attribute" to list if we have any clinical attribute options
                 dataTypeIds.push(CLIN_ATTR_DATA_TYPE);
+            }
+
+            if (!_.isEmpty(this.customAttributeOptions.result)) {
+                dataTypeIds.push(CUSTOM_ATTR_DATA_TYPE);
             }
 
             if (
@@ -2532,6 +2751,7 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
         await: () => [
             this.props.molecularProfilesInStudies,
             this.clinicalAttributeOptions,
+            this.customAttributeOptions,
         ],
         invoke: () => {
             const profiles = this.props.molecularProfilesInStudies.result!;
@@ -2583,6 +2803,13 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
                 map[
                     CLIN_ATTR_DATA_TYPE
                 ] = this.clinicalAttributeOptions.result!;
+            }
+
+            if (!_.isEmpty(this.customAttributeOptions.result)) {
+                // add custom attributes
+                map[
+                    CUSTOM_ATTR_DATA_TYPE
+                ] = this.customAttributeOptions.result!;
             }
             return Promise.resolve(map);
         },
@@ -2686,6 +2913,7 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
     @computed get hasMolecularProfile() {
         return (dataType: string | undefined) =>
             dataType !== CLIN_ATTR_DATA_TYPE &&
+            dataType !== CUSTOM_ATTR_DATA_TYPE &&
             dataType !== AlterationTypeConstants.GENERIC_ASSAY;
     }
 
@@ -2766,6 +2994,11 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
     }
 
     @action.bound
+    private handleSortByChange(option: any) {
+        this.sortByOption = option.value;
+    }
+
+    @action.bound
     private onSortOrderButtonPressed() {
         this._waterfallPlotSortOrder =
             this.waterfallPlotSortOrder === 'ASC' ? 'DESC' : 'ASC';
@@ -2822,6 +3055,7 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
             selection.dataType !== undefined &&
             selection.dataType !== NONE_SELECTED_OPTION_STRING_VALUE &&
             selection.dataType !== CLIN_ATTR_DATA_TYPE &&
+            selection.dataType !== CUSTOM_ATTR_DATA_TYPE &&
             selection.dataType !== GENESET_DATA_TYPE &&
             !isGenericAssaySelected(selection)
         );
@@ -3048,6 +3282,7 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
         return makeAxisDataPromise(
             this.horzSelection,
             this.clinicalAttributeIdToClinicalAttribute,
+            this.customAttributeIdToClinicalAttribute,
             this.props.molecularProfileIdSuffixToMolecularProfiles,
             this.props.patientKeyToFilteredSamples,
             this.props.entrezGeneIdToGene,
@@ -3075,6 +3310,7 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
         return makeAxisDataPromise(
             this.vertSelection,
             this.clinicalAttributeIdToClinicalAttribute,
+            this.customAttributeIdToClinicalAttribute,
             this.props.molecularProfileIdSuffixToMolecularProfiles,
             this.props.patientKeyToFilteredSamples,
             this.props.entrezGeneIdToGene,
@@ -3154,6 +3390,7 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
             this.props.molecularProfileIdSuffixToMolecularProfiles,
             this.props.entrezGeneIdToGene,
             this.clinicalAttributeIdToClinicalAttribute,
+            this.customAttributeIdToClinicalAttribute,
             this.plotType,
         ],
         invoke: () => {
@@ -3164,6 +3401,7 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
                         .result!,
                     this.props.entrezGeneIdToGene.result!,
                     this.clinicalAttributeIdToClinicalAttribute.result!,
+                    this.customAttributeIdToClinicalAttribute.result!,
                     this.horzLogScaleFunction
                 )
             );
@@ -3175,6 +3413,7 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
             this.props.molecularProfileIdSuffixToMolecularProfiles,
             this.props.entrezGeneIdToGene,
             this.clinicalAttributeIdToClinicalAttribute,
+            this.customAttributeIdToClinicalAttribute,
         ],
         invoke: () => {
             return Promise.resolve(
@@ -3184,6 +3423,7 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
                         .result!,
                     this.props.entrezGeneIdToGene.result!,
                     this.clinicalAttributeIdToClinicalAttribute.result!,
+                    this.customAttributeIdToClinicalAttribute.result!,
                     this.vertLogScaleFunction
                 )
             );
@@ -3195,6 +3435,7 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
             this.props.molecularProfileIdSuffixToMolecularProfiles,
             this.props.entrezGeneIdToGene,
             this.clinicalAttributeIdToClinicalAttribute,
+            this.customAttributeIdToClinicalAttribute,
             this.plotType,
         ],
         invoke: () => {
@@ -3212,6 +3453,7 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
                         .result!,
                     this.props.entrezGeneIdToGene.result!,
                     this.clinicalAttributeIdToClinicalAttribute.result!,
+                    this.customAttributeIdToClinicalAttribute.result!,
                     logScaleFunc
                 )
             );
@@ -3564,11 +3806,14 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
             : structuralVariantCountByOptions;
 
         switch (axisSelection.dataType) {
+            case CUSTOM_ATTR_DATA_TYPE:
+                dataSourceLabel = 'Custom Attribute';
+                break;
             case CLIN_ATTR_DATA_TYPE:
                 dataSourceLabel = 'Clinical Attribute';
                 break;
             case AlterationTypeConstants.MUTATION_EXTENDED:
-                dataSourceLabel = 'Group Mutations by';
+                dataSourceLabel = 'Plot Mutations by';
                 dataSourceValue = axisSelection.mutationCountBy;
                 dataSourceOptions = mutationCountByOptions;
                 onDataSourceChange = vertical
@@ -3576,7 +3821,7 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
                     : this.onHorizontalAxisMutationCountBySelect;
                 break;
             case AlterationTypeConstants.STRUCTURAL_VARIANT:
-                dataSourceLabel = 'Group Structural variants by';
+                dataSourceLabel = 'Plot Structural variants by';
                 dataSourceValue = axisSelection.structuralVariantCountBy;
                 dataSourceOptions = filterStructuralVariantOptions;
                 onDataSourceChange = vertical
@@ -3607,6 +3852,11 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
             if (axisSelection.dataType === CLIN_ATTR_DATA_TYPE) {
                 dataSourceDescription = this
                     .clinicalAttributeIdToClinicalAttribute.result![
+                    dataSourceValue
+                ].description;
+            } else if (axisSelection.dataType === CUSTOM_ATTR_DATA_TYPE) {
+                dataSourceDescription = this
+                    .customAttributeIdToClinicalAttribute.result![
                     dataSourceValue
                 ].description;
             } else {
@@ -3788,6 +4038,7 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
                         <label className="label-text">Data Type</label>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
                             <ReactSelect
+                                aria-label="Data Type Dropdown"
                                 name={`${
                                     vertical ? 'v' : 'h'
                                 }-profile-type-selector`}
@@ -3847,6 +4098,7 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
                                     }}
                                 >
                                     <ReactSelect
+                                        aria-label={`${dataSourceLabel} Dropdown`}
                                         className="data-source-id"
                                         name={`${
                                             vertical ? 'v' : 'h'
@@ -3939,7 +4191,9 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
                                 style={{
                                     display:
                                         axisSelection.dataType ===
-                                        CLIN_ATTR_DATA_TYPE
+                                            CLIN_ATTR_DATA_TYPE ||
+                                        axisSelection.dataType ===
+                                            CUSTOM_ATTR_DATA_TYPE
                                             ? 'none'
                                             : 'block',
                                 }}
@@ -3951,6 +4205,7 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
                                     >
                                         <Then>
                                             <AsyncSelect
+                                                aria-label="Gene Search Dropdown"
                                                 name={`${
                                                     vertical ? 'v' : 'h'
                                                 }-gene-selector`}
@@ -3979,7 +4234,9 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
                                                     axisSelection.dataType ===
                                                         CLIN_ATTR_DATA_TYPE ||
                                                     axisSelection.dataType ===
-                                                        GENESET_DATA_TYPE
+                                                        GENESET_DATA_TYPE ||
+                                                    axisSelection.dataType ===
+                                                        CUSTOM_ATTR_DATA_TYPE
                                                 }
                                                 loadOptions={loadOptions}
                                                 cacheOptions={true}
@@ -4017,7 +4274,9 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
                                                     axisSelection.dataType ===
                                                         CLIN_ATTR_DATA_TYPE ||
                                                     axisSelection.dataType ===
-                                                        GENESET_DATA_TYPE
+                                                        GENESET_DATA_TYPE ||
+                                                    axisSelection.dataType ===
+                                                        CUSTOM_ATTR_DATA_TYPE
                                                 }
                                             />
                                         </Else>
@@ -4125,6 +4384,8 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
                                                 undefined ||
                                             axisSelection.dataType ===
                                                 CLIN_ATTR_DATA_TYPE ||
+                                            axisSelection.dataType ===
+                                                CUSTOM_ATTR_DATA_TYPE ||
                                             !isGenericAssaySelected(
                                                 axisSelection
                                             )
@@ -4199,6 +4460,7 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
                                     Filter categories
                                 </label>
                                 <Select
+                                    aria-label="Categories Filter Dropdown"
                                     className="Select"
                                     isClearable={true}
                                     isSearchable={true}
@@ -4375,6 +4637,10 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
         const showRegression =
             this.plotType.isComplete &&
             this.plotType.result === PlotType.ScatterPlot;
+        const showConnectSamples =
+            this.plotType.isComplete &&
+            this.plotType.result === PlotType.BoxPlot &&
+            this.samplesForEachPatient.length > 0;
         if (
             !showSearchOptions &&
             !showSampleColoringOptions &&
@@ -4416,6 +4682,20 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
                             )}
                         </div>
                     )}
+                    {showConnectSamples && (
+                        <div className="checkbox" style={{ marginTop: 14 }}>
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    name="utilities_connectSamples"
+                                    value={EventKey.utilities_connectSamples}
+                                    checked={this.connectSamples}
+                                    onClick={this.onInputClick}
+                                />{' '}
+                                Connect samples from the same patient
+                            </label>
+                        </div>
+                    )}
                     {showDiscreteVsDiscreteOption && (
                         <div className="form-group">
                             <label>Plot Type</label>
@@ -4434,19 +4714,37 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
                         </div>
                     )}
                     {showStackedBarHorizontalOption && (
-                        <div className="checkbox">
-                            <label>
-                                <input
-                                    data-test="horizontalBars"
-                                    type="checkbox"
-                                    name="utilities_horizontalBars"
-                                    value={EventKey.utilities_horizontalBars}
-                                    checked={this.horizontalBars}
-                                    onClick={this.onInputClick}
-                                />{' '}
-                                Horizontal Bars
-                            </label>
-                        </div>
+                        <>
+                            <div className="form-group">
+                                <label>Sort By</label>
+                                <div style={{ display: 'flex' }}>
+                                    <ReactSelect
+                                        name="Sort By"
+                                        value={this.sortByOption}
+                                        onChange={this.handleSortByChange}
+                                        options={this.sortByDropDownOptions}
+                                        clearable={false}
+                                        searchable={true}
+                                        placeholder="Sort by..."
+                                    />
+                                </div>
+                            </div>
+                            <div className="checkbox">
+                                <label>
+                                    <input
+                                        data-test="horizontalBars"
+                                        type="checkbox"
+                                        name="utilities_horizontalBars"
+                                        value={
+                                            EventKey.utilities_horizontalBars
+                                        }
+                                        checked={this.horizontalBars}
+                                        onClick={this.onInputClick}
+                                    />{' '}
+                                    Horizontal Bars
+                                </label>
+                            </div>
+                        </>
                     )}
                     {showRegression && (
                         <div className="checkbox" style={{ marginTop: 14 }}>
@@ -5400,6 +5698,18 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
                                     horizontalBars={this.horizontalBars}
                                     percentage={isPercentage}
                                     stacked={isStacked}
+                                    sortByDropDownOptions={
+                                        this.sortByDropDownOptions
+                                    }
+                                    updateDropDownOptions={
+                                        this.updateDropDownOptions
+                                    }
+                                    sortByOption={this.sortByOption}
+                                    key={`categoryPlot-${
+                                        this.horizontalBars
+                                            ? 'horizontal'
+                                            : 'vertical'
+                                    }`}
                                 />
                             );
                         }
@@ -5594,6 +5904,10 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
                                         LEGEND_TO_BOTTOM_WIDTH_THRESHOLD
                                     }
                                     legendTitle={this.legendTitle}
+                                    renderLinePlot={this.connectSamples}
+                                    samplesForPatients={
+                                        this.samplesForEachPatient
+                                    }
                                 />
                             );
                             break;
@@ -5663,6 +5977,7 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
                                                 >
                                                     <Then>
                                                         <AsyncSelect
+                                                            aria-label="Gene or Clinical Attribute Search Dropdown"
                                                             className={
                                                                 'color-samples-toolbar-elt gene-select'
                                                             }
@@ -5932,6 +6247,7 @@ export default class PlotsTab extends React.Component<IPlotsTabProps, {}> {
                                                 marginTop: -13,
                                             }}
                                             className="hideScrollbar"
+                                            tabIndex={0}
                                             ref={this.assignScrollPaneRef}
                                         >
                                             {plotElt}

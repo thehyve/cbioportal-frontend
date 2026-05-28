@@ -724,7 +724,7 @@
   font-size: inherit;
   line-height: inherit; }
 .cbioportal-frontend a {
-  color: rgba(78, 180, 90); 
+  color: rgba(78, 180, 90);
   text-decoration: none; }
 .cbioportal-frontend a:hover, .cbioportal-frontend a:focus {
   color: rgb(13, 125, 96);
@@ -844,6 +844,7 @@
 .cbioportal-frontend .text-muted {
   color: #777777; }
 .cbioportal-frontend .text-primary {
+  color: #F95710; }
   color: #F95710; }
 .cbioportal-frontend a.text-primary:hover, .cbioportal-frontend a.text-primary:focus {
   color: #2c6b9a; }
@@ -1983,6 +1984,7 @@
   background-color: rgb(13);
   background-image: none;
   border-color: rgba(13, 125, 96, 0.5); }
+  border-color: rgba(13, 125, 96, 0.5); }
 .cbioportal-frontend .btn-primary:active:hover, .cbioportal-frontend .btn-primary:active:focus, .cbioportal-frontend .btn-primary:active.focus, .cbioportal-frontend .btn-primary.active:hover, .cbioportal-frontend .btn-primary.active:focus, .cbioportal-frontend .btn-primary.active.focus, .open > .cbioportal-frontend .btn-primary.dropdown-toggle:hover, .open > .cbioportal-frontend .btn-primary.dropdown-toggle:focus, .open > .cbioportal-frontend .btn-primary.dropdown-toggle.focus {
   color: #fff;
   background-color: rgb(78, 180, 90);
@@ -1993,6 +1995,7 @@
   border-color: rgba(13, 125, 96, 0.5);
 }
 .cbioportal-frontend .btn-primary .badge {
+  color: #F95710;
   color: #F95710;
   background-color: #fff; }
 .cbioportal-frontend .btn-success {

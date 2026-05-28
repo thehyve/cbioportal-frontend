@@ -15,7 +15,7 @@ describe('Quick Search', () => {
     beforeEach(async () => {
         const url = `${CBIOPORTAL_URL}`;
         await goToUrlAndSetLocalStorage(url);
-        await clickElement('strong=Beta!');
+        await clickElement('a.tabAnchor_quickSearch');
         await (
             await getElement('div=e.g. Lung, EGFR, TCGA-OR-A5J2')
         ).waitForExist();
@@ -55,7 +55,8 @@ describe('Quick Search', () => {
     });
 
     it('should give results for genes', async () => {
-        await clickElement('strong=454 more genes (click to load 20 more)');
+        //browser.debug();
+        await clickElement('strong=458 more genes (click to load 20 more)');
         await (await getElement('strong=ADAM12')).waitForExist();
         await clickElement('strong=ADAM15');
         await (await getElement('a=ADAM15')).waitForExist({ timeout: 60000 });

@@ -59,7 +59,6 @@ export interface IServerConfig {
     google_analytics_profile_id: string | null;
     ptmSources: string[] | undefined;
     oncoprint_hide_vus_default: boolean;
-    mycancergenome_show: boolean | undefined;
     oncokb_public_api_url: string | null;
     digital_slide_archive_iframe_url: string | null;
     digital_slide_archive_meta_url: string | null;
@@ -120,6 +119,7 @@ export interface IServerConfig {
     skin_show_tutorials_tab: boolean;
     skin_show_web_api_tab: boolean;
     skin_show_tweet_button: boolean;
+    skin_show_donate_button: boolean;
     skin_show_tissue_image_tab: boolean;
     skin_hide_logout_button: boolean;
     skin_show_settings_menu: boolean;
@@ -179,6 +179,7 @@ export interface IServerConfig {
     oncoprint_clinical_tracks_config_json: string;
     oncoprint_clustered_default: boolean; // this has a default
     enable_cross_study_expression: string;
+    oncoprint_defaultview: string; // this has a default
     studyview_max_samples_selected: number;
     study_download_url: string;
     studyview_clinical_attribute_chart_count: number;
@@ -186,5 +187,8 @@ export interface IServerConfig {
     vaf_log_scale_default: boolean; // this has a default
     skin_study_view_show_sv_table: boolean; // this has a default
     enable_study_tags: boolean;
+    clickhouse_mode: boolean;
+    assistant_enabled: boolean;
     download_custom_buttons_json: string;
+    feature_study_export: boolean;
 }

@@ -38,6 +38,7 @@ export default class ResultsViewMutationTable extends MutationTable<
     public static defaultProps = {
         ...MutationTable.defaultProps,
         columns: [
+            MutationTableColumnType.GENE,
             MutationTableColumnType.STUDY,
             MutationTableColumnType.SAMPLE_ID,
             MutationTableColumnType.COPY_NUM,
@@ -66,7 +67,6 @@ export default class ResultsViewMutationTable extends MutationTable<
             MutationTableColumnType.CLONAL,
             MutationTableColumnType.CANCER_CELL_FRACTION,
             MutationTableColumnType.EXPECTED_ALT_COPIES,
-            MutationTableColumnType.COSMIC,
             MutationTableColumnType.TUMOR_ALLELE_FREQ,
             MutationTableColumnType.NORMAL_ALLELE_FREQ,
             MutationTableColumnType.CANCER_TYPE_DETAILED,
@@ -191,6 +191,8 @@ export default class ResultsViewMutationTable extends MutationTable<
             }
         );
 
+        this._columns[MutationTableColumnType.GENE].visible = false;
+
         // override default visibility for some columns
         this._columns[
             MutationTableColumnType.CANCER_TYPE_DETAILED
@@ -234,7 +236,6 @@ export default class ResultsViewMutationTable extends MutationTable<
         this._columns[MutationTableColumnType.EXPECTED_ALT_COPIES].order = 49;
         this._columns[MutationTableColumnType.ASCN_COPY_NUM].order = 50;
         this._columns[MutationTableColumnType.COPY_NUM].order = 51;
-        this._columns[MutationTableColumnType.COSMIC].order = 60;
         this._columns[MutationTableColumnType.MUTATION_STATUS].order = 70;
         this._columns[MutationTableColumnType.VALIDATION_STATUS].order = 80;
         this._columns[MutationTableColumnType.CENTER].order = 100;
